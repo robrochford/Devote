@@ -1,0 +1,240 @@
+import React, { useState, useEffect, useRef } from 'react'
+import { Headphones, Book, ChevronRight, Loader2 } from 'lucide-react'
+import matthewHenry from '../../../../resources/matthew_henry_concise.json'
+
+export default function WordScreen({ apiKey, aiApiKey, onNext }) {
+  const [passageHtml, setPassageHtml] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [audioUrl, setAudioUrl] = useState('')
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [translation, setTranslation] = useState('ESV')
+  const [showCommentary, setShowCommentary] = useState(false)
+  const [commentaryText, setCommentaryText] = useState('')
+  const [generatingCommentary, setGeneratingCommentary] = useState(false)
+  const [todayReading, setTodayReading] = useState({ day: '', reference: '' })
+  const audioRef = useRef(null)
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true)
+      try {
+        const reading = await window.electron.ipcRenderer.invoke('get-today-reading')
+        setTodayReading(reading)
+
+        if (translation !== 'ESV') {
+          setLoading(false)
+          return
+        }
+
+        if (!apiKey) throw new Error('No API Key')
+        
+        const q = encodeURIComponent(reading.reference)
+        const data = await window.electron.ipcRenderer.invoke('fetch-esv', {
+          url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true`,
+          apiKey: apiKey
+        })
+        
+        if (data && data.passages && data.passages.length > 0) {
+          setPassageHtml(data.passages[0])
+          const q2 = encodeURIComponent(reading.reference)
+          setAudioUrl(`http://127.0.0.1:45678/audio?q=${q2}`)
+        } else {
+          setPassageHtml(`<p>Failed to load passage. Please check your API key in settings.</p>`)
+        }
+
+        const customStore = await window.electron.ipcRenderer.invoke('get-custom-commentaries')
+        const commentaryKey = `${reading.book} ${reading.startChapter}`
+        
+        if (matthewHenry[commentaryKey]) {
+          setCommentaryText(matthewHenry[commentaryKey])
+        } else if (customStore[commentaryKey]) {
+          setCommentaryText(customStore[commentaryKey])
+        } else {
+          setCommentaryText('')
+        }
+
+      } catch (err) {
+        console.error(err)
+        setPassageHtml(`<p>Error: Could not fetch ESV. Double check your API key by clicking the gear icon.</p>`)
+      }
+      setLoading(false)
+    }
+
+    loadData()
+  }, [translation, apiKey])
+
+  // Pause audio whenever the page becomes hidden (Win+Tab, Alt+Tab, minimize, snooze — everything)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (!audioRef.current) return
+      if (document.hidden) {
+        audioRef.current.pause()
+        setIsPlaying(false)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [])
+
+  const toggleAudio = () => {
+    if (!audioRef.current) return
+    if (isPlaying) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play()
+    }
+    setIsPlaying(!isPlaying)
+  }
+
+  const handleStudyClick = async () => {
+    setShowCommentary(!showCommentary)
+    
+    if (!showCommentary && !commentaryText) {
+      if (!aiApiKey) {
+        setCommentaryText("You've reached a passage with no local commentary. Add an AI API key in settings to auto-generate one!")
+        return
+      }
+
+      setGeneratingCommentary(true)
+      try {
+        const commentaryKey = `${todayReading.book} ${todayReading.startChapter}`
+        const prompt = `You are Matthew Henry. Write a concise, 3-paragraph theological and pastoral commentary on ${todayReading.reference}. Do not use flowery modern AI language. Be reverent, puritanical, and deeply thoughtful.`
+        
+        // Fetch new commentary using AI
+        const newText = await window.electron.ipcRenderer.invoke('fetch-ai', {
+          prompt: prompt
+        })
+        
+        setCommentaryText(newText)
+        
+        // Save to local store so we don't have to generate it again!
+        await window.electron.ipcRenderer.invoke('save-custom-commentary', { key: commentaryKey, text: newText })
+        
+      } catch (e) {
+        console.error(e)
+        setCommentaryText("Failed to generate commentary. Please check your AI API key.")
+      }
+      setGeneratingCommentary(false)
+    }
+  }
+
+  return (
+    <div className="flex-1 flex overflow-hidden animate-slide-in-right relative">
+      
+      {/* Main Content Area */}
+      <div className={`flex-1 flex flex-col transition-all duration-500 p-8 ${showCommentary ? 'w-2/3 pr-4 border-r border-zinc-800' : 'w-full'}`}>
+        
+        {/* Header Bar */}
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-800">
+          <div>
+            <h2 className="text-sm text-gold-500 font-medium tracking-widest uppercase mb-1">
+              Day {todayReading.day}
+            </h2>
+            <h1 className="text-2xl font-serif text-white">
+              {todayReading.reference}
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <select 
+              value={translation}
+              onChange={(e) => setTranslation(e.target.value)}
+              className="bg-zinc-800 border-none text-white text-sm rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-gold-500 outline-none"
+            >
+              <option value="ESV">ESV</option>
+              <option value="NLT">NLT</option>
+              <option value="NKJV">NKJV</option>
+            </select>
+
+            {translation === 'ESV' && audioUrl && (
+              <button 
+                onClick={toggleAudio}
+                className={`p-2 rounded-full transition-colors ${isPlaying ? 'bg-gold-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700'}`}
+                title="Play Audio"
+              >
+                <Headphones size={18} />
+                <audio ref={audioRef} src={audioUrl} onEnded={() => setIsPlaying(false)} className="hidden" />
+              </button>
+            )}
+
+            <button 
+              onClick={handleStudyClick}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${showCommentary ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700'}`}
+            >
+              <Book size={16} />
+              Study
+            </button>
+          </div>
+        </div>
+
+        {/* Text Area */}
+        <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar relative">
+          {loading ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="animate-spin text-zinc-500" size={32} />
+            </div>
+          ) : translation === 'ESV' ? (
+            <div 
+              className="prose prose-invert prose-p:text-zinc-300 prose-p:leading-loose prose-h2:text-gold-400 prose-h2:font-serif max-w-none pb-20"
+              dangerouslySetInnerHTML={{ __html: passageHtml }}
+            />
+          ) : (
+            <webview 
+              src={`https://www.biblegateway.com/passage/?search=${encodeURIComponent(todayReading.reference)}&version=${translation}`} 
+              className="w-full h-full bg-white rounded-lg"
+            />
+          )}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="pt-6 border-t border-zinc-800 flex justify-end">
+          <button 
+            onClick={onNext}
+            className="flex items-center gap-2 px-6 py-2.5 bg-white text-black font-medium rounded-full hover:bg-zinc-200 transition-colors"
+          >
+            Continue to Reflection <ChevronRight size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* Commentary Side Panel */}
+      {showCommentary && (
+        <div className="w-1/3 bg-zinc-950/50 p-6 overflow-y-auto custom-scrollbar border-l border-zinc-800 animate-slide-in-right flex flex-col">
+          <h3 className="text-gold-500 font-serif text-xl mb-4 border-b border-zinc-800 pb-2">Matthew Henry's Commentary</h3>
+          {generatingCommentary ? (
+            <div className="flex flex-col items-center justify-center flex-1 space-y-4">
+              <Loader2 className="animate-spin text-gold-500 mb-2" size={24} />
+              <p className="text-zinc-500 text-sm text-center">Auto-generating pastoral commentary for {todayReading.reference}...</p>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              {(() => {
+                // If the text naturally has newlines (e.g. from AI), just use those
+                if (commentaryText.includes('\n')) {
+                  return commentaryText.split('\n').filter(p => p.trim().length > 0)
+                }
+                // Otherwise, artificially chunk it into paragraphs so it isn't a wall of text
+                const sentences = commentaryText.match(/[^.!?]+[.!?]+[\])'"`’”]*\s*/g) || [commentaryText]
+                const paragraphs = []
+                let currentP = ''
+                sentences.forEach((s, i) => {
+                  currentP += s
+                  if ((i + 1) % 4 === 0 || i === sentences.length - 1) {
+                    paragraphs.push(currentP.trim())
+                    currentP = ''
+                  }
+                })
+                return paragraphs
+              })().map((paragraph, idx) => (
+                <p key={idx} className="text-zinc-400 leading-relaxed text-sm mb-5">
+                  {paragraph.trim()}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+    </div>
+  )
+}

@@ -1,0 +1,2557 @@
+[
+  {
+    "day": 1,
+    "reference": "Matthew 1",
+    "book": "Matthew",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 2,
+    "reference": "Psalm 1",
+    "book": "Psalms",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 3,
+    "reference": "Matthew 2-3",
+    "book": "Matthew",
+    "startChapter": 2,
+    "endChapter": 3
+  },
+  {
+    "day": 4,
+    "reference": "Psalm 2",
+    "book": "Psalms",
+    "startChapter": 2,
+    "endChapter": 2
+  },
+  {
+    "day": 5,
+    "reference": "Matthew 4",
+    "book": "Matthew",
+    "startChapter": 4,
+    "endChapter": 4
+  },
+  {
+    "day": 6,
+    "reference": "Psalm 3",
+    "book": "Psalms",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 7,
+    "reference": "Matthew 5-6",
+    "book": "Matthew",
+    "startChapter": 5,
+    "endChapter": 6
+  },
+  {
+    "day": 8,
+    "reference": "Psalm 4",
+    "book": "Psalms",
+    "startChapter": 4,
+    "endChapter": 4
+  },
+  {
+    "day": 9,
+    "reference": "Matthew 7",
+    "book": "Matthew",
+    "startChapter": 7,
+    "endChapter": 7
+  },
+  {
+    "day": 10,
+    "reference": "Psalm 5",
+    "book": "Psalms",
+    "startChapter": 5,
+    "endChapter": 5
+  },
+  {
+    "day": 11,
+    "reference": "Matthew 8-9",
+    "book": "Matthew",
+    "startChapter": 8,
+    "endChapter": 9
+  },
+  {
+    "day": 12,
+    "reference": "Psalm 6",
+    "book": "Psalms",
+    "startChapter": 6,
+    "endChapter": 6
+  },
+  {
+    "day": 13,
+    "reference": "Matthew 10",
+    "book": "Matthew",
+    "startChapter": 10,
+    "endChapter": 10
+  },
+  {
+    "day": 14,
+    "reference": "Psalm 7",
+    "book": "Psalms",
+    "startChapter": 7,
+    "endChapter": 7
+  },
+  {
+    "day": 15,
+    "reference": "Matthew 11",
+    "book": "Matthew",
+    "startChapter": 11,
+    "endChapter": 11
+  },
+  {
+    "day": 16,
+    "reference": "Psalm 8",
+    "book": "Psalms",
+    "startChapter": 8,
+    "endChapter": 8
+  },
+  {
+    "day": 17,
+    "reference": "Matthew 12-13",
+    "book": "Matthew",
+    "startChapter": 12,
+    "endChapter": 13
+  },
+  {
+    "day": 18,
+    "reference": "Psalm 9",
+    "book": "Psalms",
+    "startChapter": 9,
+    "endChapter": 9
+  },
+  {
+    "day": 19,
+    "reference": "Matthew 14",
+    "book": "Matthew",
+    "startChapter": 14,
+    "endChapter": 14
+  },
+  {
+    "day": 20,
+    "reference": "Psalm 10",
+    "book": "Psalms",
+    "startChapter": 10,
+    "endChapter": 10
+  },
+  {
+    "day": 21,
+    "reference": "Matthew 15-16",
+    "book": "Matthew",
+    "startChapter": 15,
+    "endChapter": 16
+  },
+  {
+    "day": 22,
+    "reference": "Psalm 11",
+    "book": "Psalms",
+    "startChapter": 11,
+    "endChapter": 11
+  },
+  {
+    "day": 23,
+    "reference": "Matthew 17",
+    "book": "Matthew",
+    "startChapter": 17,
+    "endChapter": 17
+  },
+  {
+    "day": 24,
+    "reference": "Psalm 12",
+    "book": "Psalms",
+    "startChapter": 12,
+    "endChapter": 12
+  },
+  {
+    "day": 25,
+    "reference": "Matthew 18",
+    "book": "Matthew",
+    "startChapter": 18,
+    "endChapter": 18
+  },
+  {
+    "day": 26,
+    "reference": "Psalm 13",
+    "book": "Psalms",
+    "startChapter": 13,
+    "endChapter": 13
+  },
+  {
+    "day": 27,
+    "reference": "Matthew 19-20",
+    "book": "Matthew",
+    "startChapter": 19,
+    "endChapter": 20
+  },
+  {
+    "day": 28,
+    "reference": "Psalm 14",
+    "book": "Psalms",
+    "startChapter": 14,
+    "endChapter": 14
+  },
+  {
+    "day": 29,
+    "reference": "Matthew 21",
+    "book": "Matthew",
+    "startChapter": 21,
+    "endChapter": 21
+  },
+  {
+    "day": 30,
+    "reference": "Psalm 15",
+    "book": "Psalms",
+    "startChapter": 15,
+    "endChapter": 15
+  },
+  {
+    "day": 31,
+    "reference": "Matthew 22-23",
+    "book": "Matthew",
+    "startChapter": 22,
+    "endChapter": 23
+  },
+  {
+    "day": 32,
+    "reference": "Psalm 16",
+    "book": "Psalms",
+    "startChapter": 16,
+    "endChapter": 16
+  },
+  {
+    "day": 33,
+    "reference": "Matthew 24",
+    "book": "Matthew",
+    "startChapter": 24,
+    "endChapter": 24
+  },
+  {
+    "day": 34,
+    "reference": "Psalm 17",
+    "book": "Psalms",
+    "startChapter": 17,
+    "endChapter": 17
+  },
+  {
+    "day": 35,
+    "reference": "Matthew 25-26",
+    "book": "Matthew",
+    "startChapter": 25,
+    "endChapter": 26
+  },
+  {
+    "day": 36,
+    "reference": "Psalm 18",
+    "book": "Psalms",
+    "startChapter": 18,
+    "endChapter": 18
+  },
+  {
+    "day": 37,
+    "reference": "Matthew 27",
+    "book": "Matthew",
+    "startChapter": 27,
+    "endChapter": 27
+  },
+  {
+    "day": 38,
+    "reference": "Psalm 19",
+    "book": "Psalms",
+    "startChapter": 19,
+    "endChapter": 19
+  },
+  {
+    "day": 39,
+    "reference": "Matthew 28",
+    "book": "Matthew",
+    "startChapter": 28,
+    "endChapter": 28
+  },
+  {
+    "day": 40,
+    "reference": "Psalm 20",
+    "book": "Psalms",
+    "startChapter": 20,
+    "endChapter": 20
+  },
+  {
+    "day": 41,
+    "reference": "Acts 1-2",
+    "book": "Acts",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 42,
+    "reference": "Psalm 21",
+    "book": "Psalms",
+    "startChapter": 21,
+    "endChapter": 21
+  },
+  {
+    "day": 43,
+    "reference": "Acts 3",
+    "book": "Acts",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 44,
+    "reference": "Psalm 22",
+    "book": "Psalms",
+    "startChapter": 22,
+    "endChapter": 22
+  },
+  {
+    "day": 45,
+    "reference": "Acts 4-5",
+    "book": "Acts",
+    "startChapter": 4,
+    "endChapter": 5
+  },
+  {
+    "day": 46,
+    "reference": "Psalm 23",
+    "book": "Psalms",
+    "startChapter": 23,
+    "endChapter": 23
+  },
+  {
+    "day": 47,
+    "reference": "Acts 6",
+    "book": "Acts",
+    "startChapter": 6,
+    "endChapter": 6
+  },
+  {
+    "day": 48,
+    "reference": "Psalm 24",
+    "book": "Psalms",
+    "startChapter": 24,
+    "endChapter": 24
+  },
+  {
+    "day": 49,
+    "reference": "Acts 7-8",
+    "book": "Acts",
+    "startChapter": 7,
+    "endChapter": 8
+  },
+  {
+    "day": 50,
+    "reference": "Psalm 25",
+    "book": "Psalms",
+    "startChapter": 25,
+    "endChapter": 25
+  },
+  {
+    "day": 51,
+    "reference": "Acts 9",
+    "book": "Acts",
+    "startChapter": 9,
+    "endChapter": 9
+  },
+  {
+    "day": 52,
+    "reference": "Psalm 26",
+    "book": "Psalms",
+    "startChapter": 26,
+    "endChapter": 26
+  },
+  {
+    "day": 53,
+    "reference": "Acts 10",
+    "book": "Acts",
+    "startChapter": 10,
+    "endChapter": 10
+  },
+  {
+    "day": 54,
+    "reference": "Psalm 27",
+    "book": "Psalms",
+    "startChapter": 27,
+    "endChapter": 27
+  },
+  {
+    "day": 55,
+    "reference": "Acts 11-12",
+    "book": "Acts",
+    "startChapter": 11,
+    "endChapter": 12
+  },
+  {
+    "day": 56,
+    "reference": "Psalm 28",
+    "book": "Psalms",
+    "startChapter": 28,
+    "endChapter": 28
+  },
+  {
+    "day": 57,
+    "reference": "Acts 13",
+    "book": "Acts",
+    "startChapter": 13,
+    "endChapter": 13
+  },
+  {
+    "day": 58,
+    "reference": "Psalm 29",
+    "book": "Psalms",
+    "startChapter": 29,
+    "endChapter": 29
+  },
+  {
+    "day": 59,
+    "reference": "Acts 14-15",
+    "book": "Acts",
+    "startChapter": 14,
+    "endChapter": 15
+  },
+  {
+    "day": 60,
+    "reference": "Psalm 30",
+    "book": "Psalms",
+    "startChapter": 30,
+    "endChapter": 30
+  },
+  {
+    "day": 61,
+    "reference": "Acts 16",
+    "book": "Acts",
+    "startChapter": 16,
+    "endChapter": 16
+  },
+  {
+    "day": 62,
+    "reference": "Psalm 31",
+    "book": "Psalms",
+    "startChapter": 31,
+    "endChapter": 31
+  },
+  {
+    "day": 63,
+    "reference": "Acts 17",
+    "book": "Acts",
+    "startChapter": 17,
+    "endChapter": 17
+  },
+  {
+    "day": 64,
+    "reference": "Psalm 32",
+    "book": "Psalms",
+    "startChapter": 32,
+    "endChapter": 32
+  },
+  {
+    "day": 65,
+    "reference": "Acts 18-19",
+    "book": "Acts",
+    "startChapter": 18,
+    "endChapter": 19
+  },
+  {
+    "day": 66,
+    "reference": "Psalm 33",
+    "book": "Psalms",
+    "startChapter": 33,
+    "endChapter": 33
+  },
+  {
+    "day": 67,
+    "reference": "Acts 20",
+    "book": "Acts",
+    "startChapter": 20,
+    "endChapter": 20
+  },
+  {
+    "day": 68,
+    "reference": "Psalm 34",
+    "book": "Psalms",
+    "startChapter": 34,
+    "endChapter": 34
+  },
+  {
+    "day": 69,
+    "reference": "Acts 21-22",
+    "book": "Acts",
+    "startChapter": 21,
+    "endChapter": 22
+  },
+  {
+    "day": 70,
+    "reference": "Psalm 35",
+    "book": "Psalms",
+    "startChapter": 35,
+    "endChapter": 35
+  },
+  {
+    "day": 71,
+    "reference": "Acts 23",
+    "book": "Acts",
+    "startChapter": 23,
+    "endChapter": 23
+  },
+  {
+    "day": 72,
+    "reference": "Psalm 36",
+    "book": "Psalms",
+    "startChapter": 36,
+    "endChapter": 36
+  },
+  {
+    "day": 73,
+    "reference": "Acts 24-25",
+    "book": "Acts",
+    "startChapter": 24,
+    "endChapter": 25
+  },
+  {
+    "day": 74,
+    "reference": "Psalm 37",
+    "book": "Psalms",
+    "startChapter": 37,
+    "endChapter": 37
+  },
+  {
+    "day": 75,
+    "reference": "Acts 26",
+    "book": "Acts",
+    "startChapter": 26,
+    "endChapter": 26
+  },
+  {
+    "day": 76,
+    "reference": "Psalm 38",
+    "book": "Psalms",
+    "startChapter": 38,
+    "endChapter": 38
+  },
+  {
+    "day": 77,
+    "reference": "Acts 27",
+    "book": "Acts",
+    "startChapter": 27,
+    "endChapter": 27
+  },
+  {
+    "day": 78,
+    "reference": "Psalm 39",
+    "book": "Psalms",
+    "startChapter": 39,
+    "endChapter": 39
+  },
+  {
+    "day": 79,
+    "reference": "Acts 28; Romans 1",
+    "book": "Acts",
+    "startChapter": 28,
+    "endChapter": 1
+  },
+  {
+    "day": 80,
+    "reference": "Psalm 40",
+    "book": "Psalms",
+    "startChapter": 40,
+    "endChapter": 40
+  },
+  {
+    "day": 81,
+    "reference": "Romans 2",
+    "book": "Romans",
+    "startChapter": 2,
+    "endChapter": 2
+  },
+  {
+    "day": 82,
+    "reference": "Psalm 41",
+    "book": "Psalms",
+    "startChapter": 41,
+    "endChapter": 41
+  },
+  {
+    "day": 83,
+    "reference": "Romans 3-4",
+    "book": "Romans",
+    "startChapter": 3,
+    "endChapter": 4
+  },
+  {
+    "day": 84,
+    "reference": "Psalm 42",
+    "book": "Psalms",
+    "startChapter": 42,
+    "endChapter": 42
+  },
+  {
+    "day": 85,
+    "reference": "Romans 5",
+    "book": "Romans",
+    "startChapter": 5,
+    "endChapter": 5
+  },
+  {
+    "day": 86,
+    "reference": "Psalm 43",
+    "book": "Psalms",
+    "startChapter": 43,
+    "endChapter": 43
+  },
+  {
+    "day": 87,
+    "reference": "Romans 6-7",
+    "book": "Romans",
+    "startChapter": 6,
+    "endChapter": 7
+  },
+  {
+    "day": 88,
+    "reference": "Psalm 44",
+    "book": "Psalms",
+    "startChapter": 44,
+    "endChapter": 44
+  },
+  {
+    "day": 89,
+    "reference": "Romans 8",
+    "book": "Romans",
+    "startChapter": 8,
+    "endChapter": 8
+  },
+  {
+    "day": 90,
+    "reference": "Psalm 45",
+    "book": "Psalms",
+    "startChapter": 45,
+    "endChapter": 45
+  },
+  {
+    "day": 91,
+    "reference": "Romans 9",
+    "book": "Romans",
+    "startChapter": 9,
+    "endChapter": 9
+  },
+  {
+    "day": 92,
+    "reference": "Psalm 46",
+    "book": "Psalms",
+    "startChapter": 46,
+    "endChapter": 46
+  },
+  {
+    "day": 93,
+    "reference": "Romans 10-11",
+    "book": "Romans",
+    "startChapter": 10,
+    "endChapter": 11
+  },
+  {
+    "day": 94,
+    "reference": "Psalm 47",
+    "book": "Psalms",
+    "startChapter": 47,
+    "endChapter": 47
+  },
+  {
+    "day": 95,
+    "reference": "Romans 12",
+    "book": "Romans",
+    "startChapter": 12,
+    "endChapter": 12
+  },
+  {
+    "day": 96,
+    "reference": "Psalm 48",
+    "book": "Psalms",
+    "startChapter": 48,
+    "endChapter": 48
+  },
+  {
+    "day": 97,
+    "reference": "Romans 13-14",
+    "book": "Romans",
+    "startChapter": 13,
+    "endChapter": 14
+  },
+  {
+    "day": 98,
+    "reference": "Psalm 49",
+    "book": "Psalms",
+    "startChapter": 49,
+    "endChapter": 49
+  },
+  {
+    "day": 99,
+    "reference": "Romans 15",
+    "book": "Romans",
+    "startChapter": 15,
+    "endChapter": 15
+  },
+  {
+    "day": 100,
+    "reference": "Psalm 50",
+    "book": "Psalms",
+    "startChapter": 50,
+    "endChapter": 50
+  },
+  {
+    "day": 101,
+    "reference": "Romans 16",
+    "book": "Romans",
+    "startChapter": 16,
+    "endChapter": 16
+  },
+  {
+    "day": 102,
+    "reference": "Psalm 51",
+    "book": "Psalms",
+    "startChapter": 51,
+    "endChapter": 51
+  },
+  {
+    "day": 103,
+    "reference": "Mark 1-2",
+    "book": "Mark",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 104,
+    "reference": "Psalm 52",
+    "book": "Psalms",
+    "startChapter": 52,
+    "endChapter": 52
+  },
+  {
+    "day": 105,
+    "reference": "Mark 3",
+    "book": "Mark",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 106,
+    "reference": "Psalm 53",
+    "book": "Psalms",
+    "startChapter": 53,
+    "endChapter": 53
+  },
+  {
+    "day": 107,
+    "reference": "Mark 4-5",
+    "book": "Mark",
+    "startChapter": 4,
+    "endChapter": 5
+  },
+  {
+    "day": 108,
+    "reference": "Psalm 54",
+    "book": "Psalms",
+    "startChapter": 54,
+    "endChapter": 54
+  },
+  {
+    "day": 109,
+    "reference": "Mark 6",
+    "book": "Mark",
+    "startChapter": 6,
+    "endChapter": 6
+  },
+  {
+    "day": 110,
+    "reference": "Psalm 55",
+    "book": "Psalms",
+    "startChapter": 55,
+    "endChapter": 55
+  },
+  {
+    "day": 111,
+    "reference": "Mark 7-8",
+    "book": "Mark",
+    "startChapter": 7,
+    "endChapter": 8
+  },
+  {
+    "day": 112,
+    "reference": "Psalm 56",
+    "book": "Psalms",
+    "startChapter": 56,
+    "endChapter": 56
+  },
+  {
+    "day": 113,
+    "reference": "Mark 9",
+    "book": "Mark",
+    "startChapter": 9,
+    "endChapter": 9
+  },
+  {
+    "day": 114,
+    "reference": "Psalm 57",
+    "book": "Psalms",
+    "startChapter": 57,
+    "endChapter": 57
+  },
+  {
+    "day": 115,
+    "reference": "Mark 10",
+    "book": "Mark",
+    "startChapter": 10,
+    "endChapter": 10
+  },
+  {
+    "day": 116,
+    "reference": "Psalm 58",
+    "book": "Psalms",
+    "startChapter": 58,
+    "endChapter": 58
+  },
+  {
+    "day": 117,
+    "reference": "Mark 11-12",
+    "book": "Mark",
+    "startChapter": 11,
+    "endChapter": 12
+  },
+  {
+    "day": 118,
+    "reference": "Psalm 59",
+    "book": "Psalms",
+    "startChapter": 59,
+    "endChapter": 59
+  },
+  {
+    "day": 119,
+    "reference": "Mark 13",
+    "book": "Mark",
+    "startChapter": 13,
+    "endChapter": 13
+  },
+  {
+    "day": 120,
+    "reference": "Psalm 60",
+    "book": "Psalms",
+    "startChapter": 60,
+    "endChapter": 60
+  },
+  {
+    "day": 121,
+    "reference": "Mark 14-15",
+    "book": "Mark",
+    "startChapter": 14,
+    "endChapter": 15
+  },
+  {
+    "day": 122,
+    "reference": "Psalm 61",
+    "book": "Psalms",
+    "startChapter": 61,
+    "endChapter": 61
+  },
+  {
+    "day": 123,
+    "reference": "Mark 16",
+    "book": "Mark",
+    "startChapter": 16,
+    "endChapter": 16
+  },
+  {
+    "day": 124,
+    "reference": "Psalm 62",
+    "book": "Psalms",
+    "startChapter": 62,
+    "endChapter": 62
+  },
+  {
+    "day": 125,
+    "reference": "1 Corinthians 1-2",
+    "book": "1 Corinthians",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 126,
+    "reference": "Psalm 63",
+    "book": "Psalms",
+    "startChapter": 63,
+    "endChapter": 63
+  },
+  {
+    "day": 127,
+    "reference": "1 Corinthians 3",
+    "book": "1 Corinthians",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 128,
+    "reference": "Psalm 64",
+    "book": "Psalms",
+    "startChapter": 64,
+    "endChapter": 64
+  },
+  {
+    "day": 129,
+    "reference": "1 Corinthians 4",
+    "book": "1 Corinthians",
+    "startChapter": 4,
+    "endChapter": 4
+  },
+  {
+    "day": 130,
+    "reference": "Psalm 65",
+    "book": "Psalms",
+    "startChapter": 65,
+    "endChapter": 65
+  },
+  {
+    "day": 131,
+    "reference": "1 Corinthians 5-6",
+    "book": "1 Corinthians",
+    "startChapter": 5,
+    "endChapter": 6
+  },
+  {
+    "day": 132,
+    "reference": "Psalm 66",
+    "book": "Psalms",
+    "startChapter": 66,
+    "endChapter": 66
+  },
+  {
+    "day": 133,
+    "reference": "1 Corinthians 7",
+    "book": "1 Corinthians",
+    "startChapter": 7,
+    "endChapter": 7
+  },
+  {
+    "day": 134,
+    "reference": "Psalm 67",
+    "book": "Psalms",
+    "startChapter": 67,
+    "endChapter": 67
+  },
+  {
+    "day": 135,
+    "reference": "1 Corinthians 8-9",
+    "book": "1 Corinthians",
+    "startChapter": 8,
+    "endChapter": 9
+  },
+  {
+    "day": 136,
+    "reference": "Psalm 68",
+    "book": "Psalms",
+    "startChapter": 68,
+    "endChapter": 68
+  },
+  {
+    "day": 137,
+    "reference": "1 Corinthians 10",
+    "book": "1 Corinthians",
+    "startChapter": 10,
+    "endChapter": 10
+  },
+  {
+    "day": 138,
+    "reference": "Psalm 69",
+    "book": "Psalms",
+    "startChapter": 69,
+    "endChapter": 69
+  },
+  {
+    "day": 139,
+    "reference": "1 Corinthians 11",
+    "book": "1 Corinthians",
+    "startChapter": 11,
+    "endChapter": 11
+  },
+  {
+    "day": 140,
+    "reference": "Psalm 70",
+    "book": "Psalms",
+    "startChapter": 70,
+    "endChapter": 70
+  },
+  {
+    "day": 141,
+    "reference": "1 Corinthians 12-13",
+    "book": "1 Corinthians",
+    "startChapter": 12,
+    "endChapter": 13
+  },
+  {
+    "day": 142,
+    "reference": "Psalm 71",
+    "book": "Psalms",
+    "startChapter": 71,
+    "endChapter": 71
+  },
+  {
+    "day": 143,
+    "reference": "1 Corinthians 14",
+    "book": "1 Corinthians",
+    "startChapter": 14,
+    "endChapter": 14
+  },
+  {
+    "day": 144,
+    "reference": "Psalm 72",
+    "book": "Psalms",
+    "startChapter": 72,
+    "endChapter": 72
+  },
+  {
+    "day": 145,
+    "reference": "1 Corinthians 15-16",
+    "book": "1 Corinthians",
+    "startChapter": 15,
+    "endChapter": 16
+  },
+  {
+    "day": 146,
+    "reference": "Psalm 73",
+    "book": "Psalms",
+    "startChapter": 73,
+    "endChapter": 73
+  },
+  {
+    "day": 147,
+    "reference": "2 Corinthians 1",
+    "book": "2 Corinthians",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 148,
+    "reference": "Psalm 74",
+    "book": "Psalms",
+    "startChapter": 74,
+    "endChapter": 74
+  },
+  {
+    "day": 149,
+    "reference": "2 Corinthians 2-3",
+    "book": "2 Corinthians",
+    "startChapter": 2,
+    "endChapter": 3
+  },
+  {
+    "day": 150,
+    "reference": "Psalm 75",
+    "book": "Psalms",
+    "startChapter": 75,
+    "endChapter": 75
+  },
+  {
+    "day": 151,
+    "reference": "2 Corinthians 4",
+    "book": "2 Corinthians",
+    "startChapter": 4,
+    "endChapter": 4
+  },
+  {
+    "day": 152,
+    "reference": "Psalm 76",
+    "book": "Psalms",
+    "startChapter": 76,
+    "endChapter": 76
+  },
+  {
+    "day": 153,
+    "reference": "2 Corinthians 5",
+    "book": "2 Corinthians",
+    "startChapter": 5,
+    "endChapter": 5
+  },
+  {
+    "day": 154,
+    "reference": "Psalm 77",
+    "book": "Psalms",
+    "startChapter": 77,
+    "endChapter": 77
+  },
+  {
+    "day": 155,
+    "reference": "2 Corinthians 6-7",
+    "book": "2 Corinthians",
+    "startChapter": 6,
+    "endChapter": 7
+  },
+  {
+    "day": 156,
+    "reference": "Psalm 78",
+    "book": "Psalms",
+    "startChapter": 78,
+    "endChapter": 78
+  },
+  {
+    "day": 157,
+    "reference": "2 Corinthians 8",
+    "book": "2 Corinthians",
+    "startChapter": 8,
+    "endChapter": 8
+  },
+  {
+    "day": 158,
+    "reference": "Psalm 79",
+    "book": "Psalms",
+    "startChapter": 79,
+    "endChapter": 79
+  },
+  {
+    "day": 159,
+    "reference": "2 Corinthians 9-10",
+    "book": "2 Corinthians",
+    "startChapter": 9,
+    "endChapter": 10
+  },
+  {
+    "day": 160,
+    "reference": "Psalm 80",
+    "book": "Psalms",
+    "startChapter": 80,
+    "endChapter": 80
+  },
+  {
+    "day": 161,
+    "reference": "2 Corinthians 11",
+    "book": "2 Corinthians",
+    "startChapter": 11,
+    "endChapter": 11
+  },
+  {
+    "day": 162,
+    "reference": "Psalm 81",
+    "book": "Psalms",
+    "startChapter": 81,
+    "endChapter": 81
+  },
+  {
+    "day": 163,
+    "reference": "2 Corinthians 12-13",
+    "book": "2 Corinthians",
+    "startChapter": 12,
+    "endChapter": 13
+  },
+  {
+    "day": 164,
+    "reference": "Psalm 82",
+    "book": "Psalms",
+    "startChapter": 82,
+    "endChapter": 82
+  },
+  {
+    "day": 165,
+    "reference": "Galatians 1",
+    "book": "Galatians",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 166,
+    "reference": "Psalm 83",
+    "book": "Psalms",
+    "startChapter": 83,
+    "endChapter": 83
+  },
+  {
+    "day": 167,
+    "reference": "Galatians 2",
+    "book": "Galatians",
+    "startChapter": 2,
+    "endChapter": 2
+  },
+  {
+    "day": 168,
+    "reference": "Psalm 84",
+    "book": "Psalms",
+    "startChapter": 84,
+    "endChapter": 84
+  },
+  {
+    "day": 169,
+    "reference": "Galatians 3-4",
+    "book": "Galatians",
+    "startChapter": 3,
+    "endChapter": 4
+  },
+  {
+    "day": 170,
+    "reference": "Psalm 85",
+    "book": "Psalms",
+    "startChapter": 85,
+    "endChapter": 85
+  },
+  {
+    "day": 171,
+    "reference": "Galatians 5",
+    "book": "Galatians",
+    "startChapter": 5,
+    "endChapter": 5
+  },
+  {
+    "day": 172,
+    "reference": "Psalm 86",
+    "book": "Psalms",
+    "startChapter": 86,
+    "endChapter": 86
+  },
+  {
+    "day": 173,
+    "reference": "Galatians 6; Ephesians 1",
+    "book": "Galatians",
+    "startChapter": 6,
+    "endChapter": 1
+  },
+  {
+    "day": 174,
+    "reference": "Psalm 87",
+    "book": "Psalms",
+    "startChapter": 87,
+    "endChapter": 87
+  },
+  {
+    "day": 175,
+    "reference": "Ephesians 2",
+    "book": "Ephesians",
+    "startChapter": 2,
+    "endChapter": 2
+  },
+  {
+    "day": 176,
+    "reference": "Psalm 88",
+    "book": "Psalms",
+    "startChapter": 88,
+    "endChapter": 88
+  },
+  {
+    "day": 177,
+    "reference": "Ephesians 3",
+    "book": "Ephesians",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 178,
+    "reference": "Psalm 89",
+    "book": "Psalms",
+    "startChapter": 89,
+    "endChapter": 89
+  },
+  {
+    "day": 179,
+    "reference": "Ephesians 4-5",
+    "book": "Ephesians",
+    "startChapter": 4,
+    "endChapter": 5
+  },
+  {
+    "day": 180,
+    "reference": "Psalm 90",
+    "book": "Psalms",
+    "startChapter": 90,
+    "endChapter": 90
+  },
+  {
+    "day": 181,
+    "reference": "Ephesians 6",
+    "book": "Ephesians",
+    "startChapter": 6,
+    "endChapter": 6
+  },
+  {
+    "day": 182,
+    "reference": "Psalm 91",
+    "book": "Psalms",
+    "startChapter": 91,
+    "endChapter": 91
+  },
+  {
+    "day": 183,
+    "reference": "Luke 1-2",
+    "book": "Luke",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 184,
+    "reference": "Psalm 92",
+    "book": "Psalms",
+    "startChapter": 92,
+    "endChapter": 92
+  },
+  {
+    "day": 185,
+    "reference": "Luke 3",
+    "book": "Luke",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 186,
+    "reference": "Psalm 93",
+    "book": "Psalms",
+    "startChapter": 93,
+    "endChapter": 93
+  },
+  {
+    "day": 187,
+    "reference": "Luke 4-5",
+    "book": "Luke",
+    "startChapter": 4,
+    "endChapter": 5
+  },
+  {
+    "day": 188,
+    "reference": "Psalm 94",
+    "book": "Psalms",
+    "startChapter": 94,
+    "endChapter": 94
+  },
+  {
+    "day": 189,
+    "reference": "Luke 6",
+    "book": "Luke",
+    "startChapter": 6,
+    "endChapter": 6
+  },
+  {
+    "day": 190,
+    "reference": "Psalm 95",
+    "book": "Psalms",
+    "startChapter": 95,
+    "endChapter": 95
+  },
+  {
+    "day": 191,
+    "reference": "Luke 7",
+    "book": "Luke",
+    "startChapter": 7,
+    "endChapter": 7
+  },
+  {
+    "day": 192,
+    "reference": "Psalm 96",
+    "book": "Psalms",
+    "startChapter": 96,
+    "endChapter": 96
+  },
+  {
+    "day": 193,
+    "reference": "Luke 8-9",
+    "book": "Luke",
+    "startChapter": 8,
+    "endChapter": 9
+  },
+  {
+    "day": 194,
+    "reference": "Psalm 97",
+    "book": "Psalms",
+    "startChapter": 97,
+    "endChapter": 97
+  },
+  {
+    "day": 195,
+    "reference": "Luke 10",
+    "book": "Luke",
+    "startChapter": 10,
+    "endChapter": 10
+  },
+  {
+    "day": 196,
+    "reference": "Psalm 98",
+    "book": "Psalms",
+    "startChapter": 98,
+    "endChapter": 98
+  },
+  {
+    "day": 197,
+    "reference": "Luke 11-12",
+    "book": "Luke",
+    "startChapter": 11,
+    "endChapter": 12
+  },
+  {
+    "day": 198,
+    "reference": "Psalm 99",
+    "book": "Psalms",
+    "startChapter": 99,
+    "endChapter": 99
+  },
+  {
+    "day": 199,
+    "reference": "Luke 13",
+    "book": "Luke",
+    "startChapter": 13,
+    "endChapter": 13
+  },
+  {
+    "day": 200,
+    "reference": "Psalm 100",
+    "book": "Psalms",
+    "startChapter": 100,
+    "endChapter": 100
+  },
+  {
+    "day": 201,
+    "reference": "Luke 14",
+    "book": "Luke",
+    "startChapter": 14,
+    "endChapter": 14
+  },
+  {
+    "day": 202,
+    "reference": "Psalm 101",
+    "book": "Psalms",
+    "startChapter": 101,
+    "endChapter": 101
+  },
+  {
+    "day": 203,
+    "reference": "Luke 15-16",
+    "book": "Luke",
+    "startChapter": 15,
+    "endChapter": 16
+  },
+  {
+    "day": 204,
+    "reference": "Psalm 102",
+    "book": "Psalms",
+    "startChapter": 102,
+    "endChapter": 102
+  },
+  {
+    "day": 205,
+    "reference": "Luke 17",
+    "book": "Luke",
+    "startChapter": 17,
+    "endChapter": 17
+  },
+  {
+    "day": 206,
+    "reference": "Psalm 103",
+    "book": "Psalms",
+    "startChapter": 103,
+    "endChapter": 103
+  },
+  {
+    "day": 207,
+    "reference": "Luke 18-19",
+    "book": "Luke",
+    "startChapter": 18,
+    "endChapter": 19
+  },
+  {
+    "day": 208,
+    "reference": "Psalm 104",
+    "book": "Psalms",
+    "startChapter": 104,
+    "endChapter": 104
+  },
+  {
+    "day": 209,
+    "reference": "Luke 20",
+    "book": "Luke",
+    "startChapter": 20,
+    "endChapter": 20
+  },
+  {
+    "day": 210,
+    "reference": "Psalm 105",
+    "book": "Psalms",
+    "startChapter": 105,
+    "endChapter": 105
+  },
+  {
+    "day": 211,
+    "reference": "Luke 21-22",
+    "book": "Luke",
+    "startChapter": 21,
+    "endChapter": 22
+  },
+  {
+    "day": 212,
+    "reference": "Psalm 106",
+    "book": "Psalms",
+    "startChapter": 106,
+    "endChapter": 106
+  },
+  {
+    "day": 213,
+    "reference": "Luke 23",
+    "book": "Luke",
+    "startChapter": 23,
+    "endChapter": 23
+  },
+  {
+    "day": 214,
+    "reference": "Psalm 107",
+    "book": "Psalms",
+    "startChapter": 107,
+    "endChapter": 107
+  },
+  {
+    "day": 215,
+    "reference": "Luke 24",
+    "book": "Luke",
+    "startChapter": 24,
+    "endChapter": 24
+  },
+  {
+    "day": 216,
+    "reference": "Psalm 108",
+    "book": "Psalms",
+    "startChapter": 108,
+    "endChapter": 108
+  },
+  {
+    "day": 217,
+    "reference": "Philippians 1-2",
+    "book": "Philippians",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 218,
+    "reference": "Psalm 109",
+    "book": "Psalms",
+    "startChapter": 109,
+    "endChapter": 109
+  },
+  {
+    "day": 219,
+    "reference": "Philippians 3",
+    "book": "Philippians",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 220,
+    "reference": "Psalm 110",
+    "book": "Psalms",
+    "startChapter": 110,
+    "endChapter": 110
+  },
+  {
+    "day": 221,
+    "reference": "Philippians 4; Colossians 1",
+    "book": "Philippians",
+    "startChapter": 4,
+    "endChapter": 1
+  },
+  {
+    "day": 222,
+    "reference": "Psalm 111",
+    "book": "Psalms",
+    "startChapter": 111,
+    "endChapter": 111
+  },
+  {
+    "day": 223,
+    "reference": "Colossians 2",
+    "book": "Colossians",
+    "startChapter": 2,
+    "endChapter": 2
+  },
+  {
+    "day": 224,
+    "reference": "Psalm 112",
+    "book": "Psalms",
+    "startChapter": 112,
+    "endChapter": 112
+  },
+  {
+    "day": 225,
+    "reference": "Colossians 3-4",
+    "book": "Colossians",
+    "startChapter": 3,
+    "endChapter": 4
+  },
+  {
+    "day": 226,
+    "reference": "Psalm 113",
+    "book": "Psalms",
+    "startChapter": 113,
+    "endChapter": 113
+  },
+  {
+    "day": 227,
+    "reference": "1 Thessalonians 1",
+    "book": "1 Thessalonians",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 228,
+    "reference": "Psalm 114",
+    "book": "Psalms",
+    "startChapter": 114,
+    "endChapter": 114
+  },
+  {
+    "day": 229,
+    "reference": "1 Thessalonians 2",
+    "book": "1 Thessalonians",
+    "startChapter": 2,
+    "endChapter": 2
+  },
+  {
+    "day": 230,
+    "reference": "Psalm 115",
+    "book": "Psalms",
+    "startChapter": 115,
+    "endChapter": 115
+  },
+  {
+    "day": 231,
+    "reference": "1 Thessalonians 3-4",
+    "book": "1 Thessalonians",
+    "startChapter": 3,
+    "endChapter": 4
+  },
+  {
+    "day": 232,
+    "reference": "Psalm 116",
+    "book": "Psalms",
+    "startChapter": 116,
+    "endChapter": 116
+  },
+  {
+    "day": 233,
+    "reference": "1 Thessalonians 5",
+    "book": "1 Thessalonians",
+    "startChapter": 5,
+    "endChapter": 5
+  },
+  {
+    "day": 234,
+    "reference": "Psalm 117",
+    "book": "Psalms",
+    "startChapter": 117,
+    "endChapter": 117
+  },
+  {
+    "day": 235,
+    "reference": "2 Thessalonians 1-2",
+    "book": "2 Thessalonians",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 236,
+    "reference": "Psalm 118",
+    "book": "Psalms",
+    "startChapter": 118,
+    "endChapter": 118
+  },
+  {
+    "day": 237,
+    "reference": "2 Thessalonians 3",
+    "book": "2 Thessalonians",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 238,
+    "reference": "Psalm 119",
+    "book": "Psalms",
+    "startChapter": 119,
+    "endChapter": 119
+  },
+  {
+    "day": 239,
+    "reference": "1 Timothy 1",
+    "book": "1 Timothy",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 240,
+    "reference": "Psalm 120",
+    "book": "Psalms",
+    "startChapter": 120,
+    "endChapter": 120
+  },
+  {
+    "day": 241,
+    "reference": "1 Timothy 2-3",
+    "book": "1 Timothy",
+    "startChapter": 2,
+    "endChapter": 3
+  },
+  {
+    "day": 242,
+    "reference": "Psalm 121",
+    "book": "Psalms",
+    "startChapter": 121,
+    "endChapter": 121
+  },
+  {
+    "day": 243,
+    "reference": "1 Timothy 4",
+    "book": "1 Timothy",
+    "startChapter": 4,
+    "endChapter": 4
+  },
+  {
+    "day": 244,
+    "reference": "Psalm 122",
+    "book": "Psalms",
+    "startChapter": 122,
+    "endChapter": 122
+  },
+  {
+    "day": 245,
+    "reference": "1 Timothy 5-6",
+    "book": "1 Timothy",
+    "startChapter": 5,
+    "endChapter": 6
+  },
+  {
+    "day": 246,
+    "reference": "Psalm 123",
+    "book": "Psalms",
+    "startChapter": 123,
+    "endChapter": 123
+  },
+  {
+    "day": 247,
+    "reference": "2 Timothy 1",
+    "book": "2 Timothy",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 248,
+    "reference": "Psalm 124",
+    "book": "Psalms",
+    "startChapter": 124,
+    "endChapter": 124
+  },
+  {
+    "day": 249,
+    "reference": "2 Timothy 2-3",
+    "book": "2 Timothy",
+    "startChapter": 2,
+    "endChapter": 3
+  },
+  {
+    "day": 250,
+    "reference": "Psalm 125",
+    "book": "Psalms",
+    "startChapter": 125,
+    "endChapter": 125
+  },
+  {
+    "day": 251,
+    "reference": "2 Timothy 4",
+    "book": "2 Timothy",
+    "startChapter": 4,
+    "endChapter": 4
+  },
+  {
+    "day": 252,
+    "reference": "Psalm 126",
+    "book": "Psalms",
+    "startChapter": 126,
+    "endChapter": 126
+  },
+  {
+    "day": 253,
+    "reference": "Titus 1",
+    "book": "Titus",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 254,
+    "reference": "Psalm 127",
+    "book": "Psalms",
+    "startChapter": 127,
+    "endChapter": 127
+  },
+  {
+    "day": 255,
+    "reference": "Titus 2-3",
+    "book": "Titus",
+    "startChapter": 2,
+    "endChapter": 3
+  },
+  {
+    "day": 256,
+    "reference": "Psalm 128",
+    "book": "Psalms",
+    "startChapter": 128,
+    "endChapter": 128
+  },
+  {
+    "day": 257,
+    "reference": "Philemon 1",
+    "book": "Philemon",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 258,
+    "reference": "Psalm 129",
+    "book": "Psalms",
+    "startChapter": 129,
+    "endChapter": 129
+  },
+  {
+    "day": 259,
+    "reference": "Hebrews 1-2",
+    "book": "Hebrews",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 260,
+    "reference": "Psalm 130",
+    "book": "Psalms",
+    "startChapter": 130,
+    "endChapter": 130
+  },
+  {
+    "day": 261,
+    "reference": "Hebrews 3",
+    "book": "Hebrews",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 262,
+    "reference": "Psalm 131",
+    "book": "Psalms",
+    "startChapter": 131,
+    "endChapter": 131
+  },
+  {
+    "day": 263,
+    "reference": "Hebrews 4-5",
+    "book": "Hebrews",
+    "startChapter": 4,
+    "endChapter": 5
+  },
+  {
+    "day": 264,
+    "reference": "Psalm 132",
+    "book": "Psalms",
+    "startChapter": 132,
+    "endChapter": 132
+  },
+  {
+    "day": 265,
+    "reference": "Hebrews 6",
+    "book": "Hebrews",
+    "startChapter": 6,
+    "endChapter": 6
+  },
+  {
+    "day": 266,
+    "reference": "Psalm 133",
+    "book": "Psalms",
+    "startChapter": 133,
+    "endChapter": 133
+  },
+  {
+    "day": 267,
+    "reference": "Hebrews 7",
+    "book": "Hebrews",
+    "startChapter": 7,
+    "endChapter": 7
+  },
+  {
+    "day": 268,
+    "reference": "Psalm 134",
+    "book": "Psalms",
+    "startChapter": 134,
+    "endChapter": 134
+  },
+  {
+    "day": 269,
+    "reference": "Hebrews 8-9",
+    "book": "Hebrews",
+    "startChapter": 8,
+    "endChapter": 9
+  },
+  {
+    "day": 270,
+    "reference": "Psalm 135",
+    "book": "Psalms",
+    "startChapter": 135,
+    "endChapter": 135
+  },
+  {
+    "day": 271,
+    "reference": "Hebrews 10",
+    "book": "Hebrews",
+    "startChapter": 10,
+    "endChapter": 10
+  },
+  {
+    "day": 272,
+    "reference": "Psalm 136",
+    "book": "Psalms",
+    "startChapter": 136,
+    "endChapter": 136
+  },
+  {
+    "day": 273,
+    "reference": "Hebrews 11-12",
+    "book": "Hebrews",
+    "startChapter": 11,
+    "endChapter": 12
+  },
+  {
+    "day": 274,
+    "reference": "Psalm 137",
+    "book": "Psalms",
+    "startChapter": 137,
+    "endChapter": 137
+  },
+  {
+    "day": 275,
+    "reference": "Hebrews 13",
+    "book": "Hebrews",
+    "startChapter": 13,
+    "endChapter": 13
+  },
+  {
+    "day": 276,
+    "reference": "Psalm 138",
+    "book": "Psalms",
+    "startChapter": 138,
+    "endChapter": 138
+  },
+  {
+    "day": 277,
+    "reference": "John 1",
+    "book": "John",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 278,
+    "reference": "Psalm 139",
+    "book": "Psalms",
+    "startChapter": 139,
+    "endChapter": 139
+  },
+  {
+    "day": 279,
+    "reference": "John 2-3",
+    "book": "John",
+    "startChapter": 2,
+    "endChapter": 3
+  },
+  {
+    "day": 280,
+    "reference": "Psalm 140",
+    "book": "Psalms",
+    "startChapter": 140,
+    "endChapter": 140
+  },
+  {
+    "day": 281,
+    "reference": "John 4",
+    "book": "John",
+    "startChapter": 4,
+    "endChapter": 4
+  },
+  {
+    "day": 282,
+    "reference": "Psalm 141",
+    "book": "Psalms",
+    "startChapter": 141,
+    "endChapter": 141
+  },
+  {
+    "day": 283,
+    "reference": "John 5-6",
+    "book": "John",
+    "startChapter": 5,
+    "endChapter": 6
+  },
+  {
+    "day": 284,
+    "reference": "Psalm 142",
+    "book": "Psalms",
+    "startChapter": 142,
+    "endChapter": 142
+  },
+  {
+    "day": 285,
+    "reference": "John 7",
+    "book": "John",
+    "startChapter": 7,
+    "endChapter": 7
+  },
+  {
+    "day": 286,
+    "reference": "Psalm 143",
+    "book": "Psalms",
+    "startChapter": 143,
+    "endChapter": 143
+  },
+  {
+    "day": 287,
+    "reference": "John 8-9",
+    "book": "John",
+    "startChapter": 8,
+    "endChapter": 9
+  },
+  {
+    "day": 288,
+    "reference": "Psalm 144",
+    "book": "Psalms",
+    "startChapter": 144,
+    "endChapter": 144
+  },
+  {
+    "day": 289,
+    "reference": "John 10",
+    "book": "John",
+    "startChapter": 10,
+    "endChapter": 10
+  },
+  {
+    "day": 290,
+    "reference": "Psalm 145",
+    "book": "Psalms",
+    "startChapter": 145,
+    "endChapter": 145
+  },
+  {
+    "day": 291,
+    "reference": "John 11",
+    "book": "John",
+    "startChapter": 11,
+    "endChapter": 11
+  },
+  {
+    "day": 292,
+    "reference": "Psalm 146",
+    "book": "Psalms",
+    "startChapter": 146,
+    "endChapter": 146
+  },
+  {
+    "day": 293,
+    "reference": "John 12-13",
+    "book": "John",
+    "startChapter": 12,
+    "endChapter": 13
+  },
+  {
+    "day": 294,
+    "reference": "Psalm 147",
+    "book": "Psalms",
+    "startChapter": 147,
+    "endChapter": 147
+  },
+  {
+    "day": 295,
+    "reference": "John 14",
+    "book": "John",
+    "startChapter": 14,
+    "endChapter": 14
+  },
+  {
+    "day": 296,
+    "reference": "Psalm 148",
+    "book": "Psalms",
+    "startChapter": 148,
+    "endChapter": 148
+  },
+  {
+    "day": 297,
+    "reference": "John 15-16",
+    "book": "John",
+    "startChapter": 15,
+    "endChapter": 16
+  },
+  {
+    "day": 298,
+    "reference": "Psalm 149",
+    "book": "Psalms",
+    "startChapter": 149,
+    "endChapter": 149
+  },
+  {
+    "day": 299,
+    "reference": "John 17",
+    "book": "John",
+    "startChapter": 17,
+    "endChapter": 17
+  },
+  {
+    "day": 300,
+    "reference": "Psalm 150",
+    "book": "Psalms",
+    "startChapter": 150,
+    "endChapter": 150
+  },
+  {
+    "day": 301,
+    "reference": "John 18-19",
+    "book": "John",
+    "startChapter": 18,
+    "endChapter": 19
+  },
+  {
+    "day": 302,
+    "reference": "Psalm 1",
+    "book": "Psalms",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 303,
+    "reference": "John 20",
+    "book": "John",
+    "startChapter": 20,
+    "endChapter": 20
+  },
+  {
+    "day": 304,
+    "reference": "Psalm 2",
+    "book": "Psalms",
+    "startChapter": 2,
+    "endChapter": 2
+  },
+  {
+    "day": 305,
+    "reference": "John 21",
+    "book": "John",
+    "startChapter": 21,
+    "endChapter": 21
+  },
+  {
+    "day": 306,
+    "reference": "Psalm 3",
+    "book": "Psalms",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 307,
+    "reference": "James 1-2",
+    "book": "James",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 308,
+    "reference": "Psalm 4",
+    "book": "Psalms",
+    "startChapter": 4,
+    "endChapter": 4
+  },
+  {
+    "day": 309,
+    "reference": "James 3",
+    "book": "James",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 310,
+    "reference": "Psalm 5",
+    "book": "Psalms",
+    "startChapter": 5,
+    "endChapter": 5
+  },
+  {
+    "day": 311,
+    "reference": "James 4-5",
+    "book": "James",
+    "startChapter": 4,
+    "endChapter": 5
+  },
+  {
+    "day": 312,
+    "reference": "Psalm 6",
+    "book": "Psalms",
+    "startChapter": 6,
+    "endChapter": 6
+  },
+  {
+    "day": 313,
+    "reference": "1 Peter 1",
+    "book": "1 Peter",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 314,
+    "reference": "Psalm 7",
+    "book": "Psalms",
+    "startChapter": 7,
+    "endChapter": 7
+  },
+  {
+    "day": 315,
+    "reference": "1 Peter 2",
+    "book": "1 Peter",
+    "startChapter": 2,
+    "endChapter": 2
+  },
+  {
+    "day": 316,
+    "reference": "Psalm 8",
+    "book": "Psalms",
+    "startChapter": 8,
+    "endChapter": 8
+  },
+  {
+    "day": 317,
+    "reference": "1 Peter 3-4",
+    "book": "1 Peter",
+    "startChapter": 3,
+    "endChapter": 4
+  },
+  {
+    "day": 318,
+    "reference": "Psalm 9",
+    "book": "Psalms",
+    "startChapter": 9,
+    "endChapter": 9
+  },
+  {
+    "day": 319,
+    "reference": "1 Peter 5",
+    "book": "1 Peter",
+    "startChapter": 5,
+    "endChapter": 5
+  },
+  {
+    "day": 320,
+    "reference": "Psalm 10",
+    "book": "Psalms",
+    "startChapter": 10,
+    "endChapter": 10
+  },
+  {
+    "day": 321,
+    "reference": "2 Peter 1-2",
+    "book": "2 Peter",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 322,
+    "reference": "Psalm 11",
+    "book": "Psalms",
+    "startChapter": 11,
+    "endChapter": 11
+  },
+  {
+    "day": 323,
+    "reference": "2 Peter 3",
+    "book": "2 Peter",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 324,
+    "reference": "Psalm 12",
+    "book": "Psalms",
+    "startChapter": 12,
+    "endChapter": 12
+  },
+  {
+    "day": 325,
+    "reference": "1 John 1-2",
+    "book": "1 John",
+    "startChapter": 1,
+    "endChapter": 2
+  },
+  {
+    "day": 326,
+    "reference": "Psalm 13",
+    "book": "Psalms",
+    "startChapter": 13,
+    "endChapter": 13
+  },
+  {
+    "day": 327,
+    "reference": "1 John 3",
+    "book": "1 John",
+    "startChapter": 3,
+    "endChapter": 3
+  },
+  {
+    "day": 328,
+    "reference": "Psalm 14",
+    "book": "Psalms",
+    "startChapter": 14,
+    "endChapter": 14
+  },
+  {
+    "day": 329,
+    "reference": "1 John 4",
+    "book": "1 John",
+    "startChapter": 4,
+    "endChapter": 4
+  },
+  {
+    "day": 330,
+    "reference": "Psalm 15",
+    "book": "Psalms",
+    "startChapter": 15,
+    "endChapter": 15
+  },
+  {
+    "day": 331,
+    "reference": "1 John 5; 2 John 1",
+    "book": "1 John",
+    "startChapter": 5,
+    "endChapter": 1
+  },
+  {
+    "day": 332,
+    "reference": "Psalm 16",
+    "book": "Psalms",
+    "startChapter": 16,
+    "endChapter": 16
+  },
+  {
+    "day": 333,
+    "reference": "3 John 1",
+    "book": "3 John",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 334,
+    "reference": "Psalm 17",
+    "book": "Psalms",
+    "startChapter": 17,
+    "endChapter": 17
+  },
+  {
+    "day": 335,
+    "reference": "Jude 1; Revelation 1",
+    "book": "Jude",
+    "startChapter": 1,
+    "endChapter": 1
+  },
+  {
+    "day": 336,
+    "reference": "Psalm 18",
+    "book": "Psalms",
+    "startChapter": 18,
+    "endChapter": 18
+  },
+  {
+    "day": 337,
+    "reference": "Revelation 2",
+    "book": "Revelation",
+    "startChapter": 2,
+    "endChapter": 2
+  },
+  {
+    "day": 338,
+    "reference": "Psalm 19",
+    "book": "Psalms",
+    "startChapter": 19,
+    "endChapter": 19
+  },
+  {
+    "day": 339,
+    "reference": "Revelation 3-4",
+    "book": "Revelation",
+    "startChapter": 3,
+    "endChapter": 4
+  },
+  {
+    "day": 340,
+    "reference": "Psalm 20",
+    "book": "Psalms",
+    "startChapter": 20,
+    "endChapter": 20
+  },
+  {
+    "day": 341,
+    "reference": "Revelation 5",
+    "book": "Revelation",
+    "startChapter": 5,
+    "endChapter": 5
+  },
+  {
+    "day": 342,
+    "reference": "Psalm 21",
+    "book": "Psalms",
+    "startChapter": 21,
+    "endChapter": 21
+  },
+  {
+    "day": 343,
+    "reference": "Revelation 6",
+    "book": "Revelation",
+    "startChapter": 6,
+    "endChapter": 6
+  },
+  {
+    "day": 344,
+    "reference": "Psalm 22",
+    "book": "Psalms",
+    "startChapter": 22,
+    "endChapter": 22
+  },
+  {
+    "day": 345,
+    "reference": "Revelation 7-8",
+    "book": "Revelation",
+    "startChapter": 7,
+    "endChapter": 8
+  },
+  {
+    "day": 346,
+    "reference": "Psalm 23",
+    "book": "Psalms",
+    "startChapter": 23,
+    "endChapter": 23
+  },
+  {
+    "day": 347,
+    "reference": "Revelation 9",
+    "book": "Revelation",
+    "startChapter": 9,
+    "endChapter": 9
+  },
+  {
+    "day": 348,
+    "reference": "Psalm 24",
+    "book": "Psalms",
+    "startChapter": 24,
+    "endChapter": 24
+  },
+  {
+    "day": 349,
+    "reference": "Revelation 10-11",
+    "book": "Revelation",
+    "startChapter": 10,
+    "endChapter": 11
+  },
+  {
+    "day": 350,
+    "reference": "Psalm 25",
+    "book": "Psalms",
+    "startChapter": 25,
+    "endChapter": 25
+  },
+  {
+    "day": 351,
+    "reference": "Revelation 12",
+    "book": "Revelation",
+    "startChapter": 12,
+    "endChapter": 12
+  },
+  {
+    "day": 352,
+    "reference": "Psalm 26",
+    "book": "Psalms",
+    "startChapter": 26,
+    "endChapter": 26
+  },
+  {
+    "day": 353,
+    "reference": "Revelation 13",
+    "book": "Revelation",
+    "startChapter": 13,
+    "endChapter": 13
+  },
+  {
+    "day": 354,
+    "reference": "Psalm 27",
+    "book": "Psalms",
+    "startChapter": 27,
+    "endChapter": 27
+  },
+  {
+    "day": 355,
+    "reference": "Revelation 14-15",
+    "book": "Revelation",
+    "startChapter": 14,
+    "endChapter": 15
+  },
+  {
+    "day": 356,
+    "reference": "Psalm 28",
+    "book": "Psalms",
+    "startChapter": 28,
+    "endChapter": 28
+  },
+  {
+    "day": 357,
+    "reference": "Revelation 16",
+    "book": "Revelation",
+    "startChapter": 16,
+    "endChapter": 16
+  },
+  {
+    "day": 358,
+    "reference": "Psalm 29",
+    "book": "Psalms",
+    "startChapter": 29,
+    "endChapter": 29
+  },
+  {
+    "day": 359,
+    "reference": "Revelation 17-18",
+    "book": "Revelation",
+    "startChapter": 17,
+    "endChapter": 18
+  },
+  {
+    "day": 360,
+    "reference": "Psalm 30",
+    "book": "Psalms",
+    "startChapter": 30,
+    "endChapter": 30
+  },
+  {
+    "day": 361,
+    "reference": "Revelation 19",
+    "book": "Revelation",
+    "startChapter": 19,
+    "endChapter": 19
+  },
+  {
+    "day": 362,
+    "reference": "Psalm 31",
+    "book": "Psalms",
+    "startChapter": 31,
+    "endChapter": 31
+  },
+  {
+    "day": 363,
+    "reference": "Revelation 20-21",
+    "book": "Revelation",
+    "startChapter": 20,
+    "endChapter": 21
+  },
+  {
+    "day": 364,
+    "reference": "Psalm 32",
+    "book": "Psalms",
+    "startChapter": 32,
+    "endChapter": 32
+  },
+  {
+    "day": 365,
+    "reference": "Revelation 22",
+    "book": "Revelation",
+    "startChapter": 22,
+    "endChapter": 22
+  }
+]

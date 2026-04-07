@@ -1,0 +1,12 @@
+node_modules
+dist
+out
+.eb-cache
+*.log
+.env
+.dev-app-update.yml
+background-command-*.txt
+*.exe
+*.zip
+*.nupkg
+*.blockmap
