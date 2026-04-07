@@ -1,4 +1,5 @@
-import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeImage, session, protocol, net, powerMonitor } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeImage, session, protocol, net, powerMonitor, dialog } from 'electron'
+import { autoUpdater } from 'electron-updater'
 import { join } from 'path'
 import { createServer } from 'http'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
@@ -43,6 +44,21 @@ protocol.registerSchemesAsPrivileged([{
 app.setLoginItemSettings({
   openAtLogin: true,
   path: app.getPath('exe')
+})
+
+// Configure Auto-Updater
+autoUpdater.autoDownload = true
+autoUpdater.autoInstallOnAppQuit = true
+
+autoUpdater.on('update-downloaded', (info) => {
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Update Ready',
+    message: `A new version of Devote (${info.version}) is ready. Restart now to apply?`,
+    buttons: ['Restart', 'Later']
+  }).then((result) => {
+    if (result.response === 0) autoUpdater.quitAndInstall()
+  })
 })
 
 // Single instance lock — prevents EADDRINUSE crashes and ensures exe click shows existing window
@@ -531,7 +547,13 @@ app.whenReady().then(() => {
     store.set('customCommentaries', current)
     return true
   })
+
+  // Check for updates on startup
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify()
+  }
 })
+
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
