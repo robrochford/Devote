@@ -1,6 +1,3 @@
-node_modules
-dist
-out
 .eb-cache
 *.log
 .env
@@ -10,3 +7,23 @@ background-command-*.txt
 *.zip
 *.nupkg
 *.blockmap
+
+# Documentation & Private Notes
+KNOWLEDGE_BASE.md
+mobile_plans/
+CHANGELOG.md
+
+# Build Artifacts & Source Mapping
+node_modules
+dist
+out
+package-lock.json
+
+# Scripting & Testing Tools
+fix-icon.js
+generate*.js
+test_ai.mjs
+missing_commentaries.json
+scripts/scrape_mhc.mjs
+clean_log.txt
+test.txt
