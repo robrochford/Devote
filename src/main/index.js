@@ -344,6 +344,8 @@ app.whenReady().then(() => {
     }
   })
 
+  ipcMain.handle('get-version', () => app.getVersion())
+
   // IPC Handlers
   ipcMain.handle('get-settings', () => {
     const s = store.store

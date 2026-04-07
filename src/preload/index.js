@@ -23,7 +23,7 @@ if (process.contextIsolated) {
           }
         },
         invoke: (channel, ...args) => {
-          const validChannels = ['get-settings', 'save-settings', 'fetch-esv', 'fetch-esv-audio', 'fetch-ai', 'get-custom-commentaries', 'save-custom-commentary', 'get-today-reading', 'get-all-books']
+          const validChannels = ['get-settings', 'save-settings', 'fetch-esv', 'fetch-esv-audio', 'fetch-ai', 'get-custom-commentaries', 'save-custom-commentary', 'get-today-reading', 'get-all-books', 'get-version']
           if (validChannels.includes(channel)) {
             return ipcRenderer.invoke(channel, ...args)
           }

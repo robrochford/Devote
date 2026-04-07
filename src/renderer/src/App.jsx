@@ -13,10 +13,12 @@ export default function App() {
   const [settings, setSettings] = useState({})
   const [justFinished, setJustFinished] = useState(false)
   const [resetKey, setResetKey] = useState(0)
+  const [appVersion, setAppVersion] = useState('')
 
   useEffect(() => {
     // Load initial settings
     if (window.electron) {
+      window.electron.ipcRenderer.invoke('get-version').then(v => setAppVersion(v))
       window.electron.ipcRenderer.invoke('get-settings').then(s => {
         // Migrate old geminiApiKey to generic aiApiKey if found
         if (s.geminiApiKey && !s.aiApiKey) {
@@ -177,6 +179,10 @@ export default function App() {
               >
                 Save & Close
               </button>
+
+              <div className="pt-4 text-center">
+                <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Version {appVersion}</span>
+              </div>
             </div>
           </div>
         )}
