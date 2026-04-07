@@ -2,6 +2,15 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-04-07]
+
+### Added
+- **Auto-Update Engine**: Integrated `electron-updater` with GitHub Releases. The application now automatically checks for updates on launch, downloads them in the background, and prompts the user for a single-click restart to stay current.
+- **Production Asset Optimization**: Structured a `.gitignore` architecture to exclude multi-gigabyte build caches (`.eb-cache`) and installers from source control, ensuring a lean and professional repository footprint.
+
+### Fixed
+- **State Persistence Drift**: Resolved a transient "Invalid ESV Key" error by flushing local `electron-store` cache, ensuring the hardcoded fallback keys correctly re-initialize during application updates.
+
 ## [2026-04-06]
 
 ### Added

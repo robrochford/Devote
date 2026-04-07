@@ -98,3 +98,15 @@ A repository of technical learnings, architectural decisions, and workspace insi
 ### 3. Graceful Kiosk Mitigation
 - **Observation**: If you permanently lock Kiosk Mode down to `alwaysOnTop: true`, users might get trapped during setup phases that require grabbing third-party API keys from a browser window behind it. However, forcibly un-locking OS Kiosk mode natively using Electron methods (`setKiosk(false)` against transparent-mode bounds) is incredibly error-prone and jitter-heavy on Windows.
 - **The Solution**: Rely on the native `minimize()` command instead! By adding a targeted "Minimize App" button and triggering a `minimize-window` IPC bridge, users can cleanly bounce the app right into their system tray manually or via automatic `kioskWindow.on('blur')` triggers. Combined with an explicit `.on('restore', () => kioskWindow.setAlwaysOnTop(true) ...)` intercept, the app can then bounce perfectly back to the extreme top front of the Z-index exactly when requested.
+
+## Distribution & Repository Management
+
+### 1. GitHub Auto-Update CI
+- **Strategy**: Use the `github` provider in `electron-builder.yml`. This allows the application to leverage the GitHub API as a free version-checking server.
+- **Requirement**: The application version in `package.json` must be strictly incremented for the update engine to trigger.
+- **The "Release" Trigger**: Running `electron-builder --win -p always` (with a valid `GH_TOKEN`) automatically creates a draft Release on GitHub and uploads the required `.exe` and `latest.yml` manifests needed for the client apps to detect the change.
+
+### 2. Large File Management
+- **Learning**: GitHub has a strict 100MB file limit for standard pushes. Compiled Electron `.exe` files and `node_modules` folders frequently exceed this.
+- **Best Practice**: Always maintain a robust `.gitignore`. Never track `dist/`, `out/`, or `.eb-cache/`. This keeps the repository focused purely on source code, while the `dist/` artifacts are handled separately as GitHub Release attachments.
+
