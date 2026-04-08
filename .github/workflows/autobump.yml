@@ -8,9 +8,6 @@ on:
       - 'package.json'
       - '.github/workflows/**'
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   bump-version:
     runs-on: ubuntu-latest
