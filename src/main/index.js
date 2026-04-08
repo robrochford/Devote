@@ -61,6 +61,15 @@ autoUpdater.on('update-downloaded', (info) => {
   })
 })
 
+function checkForUpdates() {
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify().catch(err => {
+       console.error('Update check failed:', err)
+    })
+  }
+}
+
+
 // Single instance lock — prevents EADDRINUSE crashes and ensures exe click shows existing window
 const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) {
@@ -71,6 +80,7 @@ if (!gotLock) {
   // When a second instance tries to launch, show and focus the existing window
   app.on('second-instance', () => {
     evaluateStreak()
+    checkForUpdates()
     if (kioskWindow) {
       if (kioskWindow.isMinimized()) kioskWindow.restore()
       kioskWindow.show()
@@ -303,6 +313,7 @@ app.whenReady().then(() => {
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Open Devote', click: () => {
       evaluateStreak()
+      checkForUpdates()
       if (kioskWindow) {
         kioskWindow.show()
         kioskWindow.focus()
@@ -310,6 +321,7 @@ app.whenReady().then(() => {
         createKioskWindow()
       }
     }},
+    { label: 'Check for Updates...', click: () => checkForUpdates() },
     { label: 'Snooze 1 Hour', click: () => {
       const now = new Date()
       now.setHours(now.getHours() + 1)
@@ -555,10 +567,11 @@ app.whenReady().then(() => {
     return true
   })
 
-  // Check for updates on startup
-  if (app.isPackaged) {
-    autoUpdater.checkForUpdatesAndNotify()
-  }
+  // Background update check cycle (every 4 hours)
+  setInterval(() => checkForUpdates(), 4 * 60 * 60 * 1000)
+
+  // Initial check on startup
+  checkForUpdates()
 })
 
 
