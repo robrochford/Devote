@@ -95,9 +95,19 @@ export default function App() {
   }
 
   const handleSaveSettings = (newSettings) => {
+    const isNewDay = newSettings.currentPlanDay !== settings.currentPlanDay
+    const isUnlocked = settings.completedToday && newSettings.completedToday === false
+    
     const updated = { ...settings, ...newSettings }
     setSettings(updated)
     if (window.electron) window.electron.ipcRenderer.invoke('save-settings', updated)
+    
+    if (isNewDay || isUnlocked) {
+      setCurrentScreen('prayer')
+      setResetKey(key => key + 1)
+      setJustFinished(false)
+    }
+    
     setShowSettings(false)
   }
 
