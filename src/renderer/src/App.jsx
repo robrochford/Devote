@@ -14,6 +14,7 @@ export default function App() {
   const [justFinished, setJustFinished] = useState(false)
   const [resetKey, setResetKey] = useState(0)
   const [appVersion, setAppVersion] = useState('')
+  const [originalDay, setOriginalDay] = useState(1)
 
   useEffect(() => {
     // Load initial settings
@@ -95,14 +96,17 @@ export default function App() {
   }
 
   const handleSaveSettings = (newSettings) => {
-    const isNewDay = newSettings.currentPlanDay !== settings.currentPlanDay
-    const isUnlocked = settings.completedToday && newSettings.completedToday === false
-    
     const updated = { ...settings, ...newSettings }
+    
+    // If the user changed the day or unlocked a completed day, 
+    // we need to force the UI to reset to the beginning.
+    const needsReset = (updated.currentPlanDay !== originalDay) || 
+                       (currentScreen === 'complete' && updated.completedToday === false)
+    
     setSettings(updated)
     if (window.electron) window.electron.ipcRenderer.invoke('save-settings', updated)
     
-    if (isNewDay || isUnlocked) {
+    if (needsReset) {
       setCurrentScreen('prayer')
       setResetKey(key => key + 1)
       setJustFinished(false)
@@ -119,7 +123,10 @@ export default function App() {
         {/* Settings Button */}
         {settings.hasCompletedOnboarding && (
           <button 
-            onClick={() => setShowSettings(!showSettings)}
+            onClick={() => {
+              if (!showSettings) setOriginalDay(settings.currentPlanDay)
+              setShowSettings(!showSettings)
+            }}
             className="absolute bottom-6 left-6 p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors z-[100] opacity-0 group-hover:opacity-100"
           >
             {showSettings ? <X size={20} /> : <Settings size={20} />}
