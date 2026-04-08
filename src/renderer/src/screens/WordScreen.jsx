@@ -5,6 +5,7 @@ import matthewHenry from '../../../../resources/matthew_henry_concise.json'
 export default function WordScreen({ apiKey, aiApiKey, onNext }) {
   const [passageHtml, setPassageHtml] = useState('')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [audioUrl, setAudioUrl] = useState('')
   const [isPlaying, setIsPlaying] = useState(false)
   const [translation, setTranslation] = useState('ESV')
@@ -16,32 +17,39 @@ export default function WordScreen({ apiKey, aiApiKey, onNext }) {
 
   useEffect(() => {
     async function loadData() {
+      setError('')
       setLoading(true)
+      
       try {
+        // 1. Fetch the reading reference immediately regardless of API key
+        // This ensures the header (Day 2, etc) is always correct
         const reading = await window.electron.ipcRenderer.invoke('get-today-reading')
         setTodayReading(reading)
 
-        if (translation !== 'ESV') {
-          setLoading(false)
+        // 2. If we haven't received the apiKey prop yet (due to settings loading race),
+        // we bail but keep the loader spinning until it arrives.
+        if (!apiKey) {
           return
         }
 
-        if (!apiKey) throw new Error('No API Key')
-        
-        const q = encodeURIComponent(reading.reference)
-        const data = await window.electron.ipcRenderer.invoke('fetch-esv', {
-          url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true`,
-          apiKey: apiKey
-        })
-        
-        if (data && data.passages && data.passages.length > 0) {
-          setPassageHtml(data.passages[0])
-          const q2 = encodeURIComponent(reading.reference)
-          setAudioUrl(`http://127.0.0.1:45678/audio?q=${q2}`)
-        } else {
-          setPassageHtml(`<p>Failed to load passage. Please check your API key in settings.</p>`)
+        // ESV specific fetch
+        if (translation === 'ESV') {
+          const q = encodeURIComponent(reading.reference)
+          const data = await window.electron.ipcRenderer.invoke('fetch-esv', {
+            url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true`,
+            apiKey: apiKey
+          })
+          
+          if (data && data.passages && data.passages.length > 0) {
+            setPassageHtml(data.passages[0])
+            const q2 = encodeURIComponent(reading.reference)
+            setAudioUrl(`http://127.0.0.1:45678/audio?q=${q2}`)
+          } else {
+            setError('The ESV API returned no passage content for this reference.')
+          }
         }
 
+        // Commentary Logic
         const customStore = await window.electron.ipcRenderer.invoke('get-custom-commentaries')
         const commentaryKey = `${reading.book} ${reading.startChapter}`
         
@@ -53,11 +61,12 @@ export default function WordScreen({ apiKey, aiApiKey, onNext }) {
           setCommentaryText('')
         }
 
+        setLoading(false)
       } catch (err) {
-        console.error(err)
-        setPassageHtml(`<p>Error: Could not fetch ESV. Double check your API key by clicking the gear icon.</p>`)
+        console.error('WordScreen load error:', err)
+        setError(err.message || 'Could not fetch the daily reading.')
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     loadData()
@@ -172,6 +181,16 @@ export default function WordScreen({ apiKey, aiApiKey, onNext }) {
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader2 className="animate-spin text-zinc-500" size={32} />
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
+              <p className="text-red-400 text-sm leading-relaxed">{error}</p>
+              <button
+                onClick={() => { setError(''); setLoading(true); window.location.reload() }}
+                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors"
+              >
+                Try Again
+              </button>
             </div>
           ) : translation === 'ESV' ? (
             <div 

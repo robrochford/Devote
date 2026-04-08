@@ -29,7 +29,7 @@ const defaultSettings = {
 }
 
 for (const [key, value] of Object.entries(defaultSettings)) {
-  if (!store.has(key)) {
+  if (!store.has(key) || store.get(key) === '') {
     store.set(key, value)
   }
 }
@@ -412,15 +412,20 @@ app.whenReady().then(() => {
 
   ipcMain.handle('fetch-esv', async (_, { url, apiKey }) => {
     try {
+      if (!apiKey) throw new Error('Missing ESV API Key')
       const response = await fetch(url, {
         headers: {
           'Authorization': apiKey.startsWith('Token') ? apiKey : `Token ${apiKey}`
         }
       })
-      if (!response.ok) throw new Error('API Error ' + response.status)
+      if (!response.ok) {
+        if (response.status === 401) throw new Error('Unauthorized: Your ESV API key is invalid.')
+        if (response.status === 403) throw new Error('Forbidden: Your ESV API key does not have access to this resource.')
+        throw new Error(`API Error ${response.status}`)
+      }
       return await response.json()
     } catch (e) {
-      console.error(e)
+      console.error('fetch-esv error:', e)
       throw e
     }
   })
