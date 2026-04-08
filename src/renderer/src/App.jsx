@@ -147,6 +147,24 @@ export default function App() {
                 <p className="text-[10px] text-zinc-500 mt-2 px-1">Initial set-up: Leave ESV key as default. Just paste an AI key to enable reflections.</p>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2 font-serif">Plan Day Progression</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="number" 
+                    className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold-500 text-sm"
+                    value={settings.currentPlanDay || 1}
+                    onChange={(e) => setSettings({...settings, currentPlanDay: parseInt(e.target.value) || 1, completedToday: false})}
+                    min="1"
+                    max="365"
+                  />
+                  <div className="px-3 py-2 bg-zinc-800/50 rounded-lg border border-zinc-700/30 text-[10px] text-zinc-500 flex items-center">
+                    / 365
+                  </div>
+                </div>
+                <p className="text-[10px] text-zinc-600 mt-2 px-1">Jumping to a day will unlock it if previously completed.</p>
+              </div>
+
               <div className="pt-6 flex gap-4 border-t border-zinc-800">
                 <button 
                   onClick={handleSnooze}
