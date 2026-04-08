@@ -32,7 +32,7 @@ jobs:
 
       - name: Bump version and push tag
         run: |
-          npm version patch -m "chore: bump version to %s [skip ci]"
+          npm version patch -m "chore: bump version to %s"
           git push origin main --follow-tags
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
