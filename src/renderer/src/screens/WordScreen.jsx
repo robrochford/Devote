@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Headphones, Book, ChevronRight, Loader2 } from 'lucide-react'
 import matthewHenry from '../../../../resources/matthew_henry_concise.json'
 
-export default function WordScreen({ apiKey, aiApiKey, onNext }) {
+export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
   const [passageHtml, setPassageHtml] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -34,18 +34,28 @@ export default function WordScreen({ apiKey, aiApiKey, onNext }) {
 
         // ESV specific fetch
         if (translation === 'ESV') {
-          const q = encodeURIComponent(reading.reference)
-          const data = await window.electron.ipcRenderer.invoke('fetch-esv', {
-            url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true`,
-            apiKey: apiKey
-          })
-          
-          if (data && data.passages && data.passages.length > 0) {
+          // CHECK CACHE FIRST: If we have today's reading pre-fetched, use it instantly!
+          if (settings.cachedReading && settings.cachedReading.day === reading.day) {
+            console.log('Using cached reading for Day', reading.day)
+            const data = settings.cachedReading.data
             setPassageHtml(data.passages[0])
             const q2 = encodeURIComponent(reading.reference)
             setAudioUrl(`http://127.0.0.1:45678/audio?q=${q2}`)
           } else {
-            setError('The ESV API returned no passage content for this reference.')
+            console.log('No cache found or day mismatch, fetching fresh...')
+            const q = encodeURIComponent(reading.reference)
+            const data = await window.electron.ipcRenderer.invoke('fetch-esv', {
+              url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true`,
+              apiKey: apiKey
+            })
+            
+            if (data && data.passages && data.passages.length > 0) {
+              setPassageHtml(data.passages[0])
+              const q2 = encodeURIComponent(reading.reference)
+              setAudioUrl(`http://127.0.0.1:45678/audio?q=${q2}`)
+            } else {
+              setError('The ESV API returned no passage content for this reference.')
+            }
           }
         }
 

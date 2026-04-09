@@ -25,7 +25,8 @@ const defaultSettings = {
   planType: 'devote',
   customBooks: [],
   currentPlanDay: 1,
-  hasCompletedOnboarding: false
+  hasCompletedOnboarding: false,
+  cachedReading: null // { day: number, data: object }
 }
 
 for (const [key, value] of Object.entries(defaultSettings)) {
@@ -387,16 +388,45 @@ app.whenReady().then(() => {
   ipcMain.on('complete-devotion', () => {
     const settings = store.store
     const todayStr = getLocalDayStr()
+    const nextDay = (settings.currentPlanDay || 1) + 1
     
     if (settings.lastCompletedDate !== todayStr) {
       store.set('lastCompletedDate', todayStr)
       store.set('currentStreak', (settings.currentStreak || 0) + 1)
-      store.set('currentPlanDay', (settings.currentPlanDay || 1) + 1)
+      store.set('currentPlanDay', nextDay)
+
+      // Prefetch tomorrow's reading while internet is active
+      prefetchNextReading(nextDay)
     }
     
     // reset snooze
     store.set('snoozeUntil', null)
   })
+
+  async function prefetchNextReading(nextDay) {
+    try {
+      const s = store.store
+      const apiKey = s.esvApiKey
+      const reading = getReadingForDay(s.planType, s.customBooks, nextDay)
+      
+      const query = encodeURIComponent(reading.reference)
+      const url = `https://api.esv.org/v3/passage/json/?q=${query}&include-headings=true&include-footnotes=false&include-audio-link=true`
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': apiKey.startsWith('Token') ? apiKey : `Token ${apiKey}`
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        store.set('cachedReading', { day: nextDay, data: data })
+        console.log(`Successfully prefetched reading for day ${nextDay}`)
+      }
+    } catch (e) {
+      console.error('Prefetch failed:', e)
+    }
+  }
 
   ipcMain.on('close-kiosk', () => {
     if (kioskWindow) kioskWindow.hide()

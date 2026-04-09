@@ -230,11 +230,14 @@ export default function App() {
             </div>
             
             <div className={currentScreen === 'word' ? 'absolute inset-0 flex' : 'hidden'}>
-               <WordScreen 
+              {currentScreen === 'word' && (
+                <WordScreen 
+                  settings={settings}
                   apiKey={settings.esvApiKey} 
-                  aiApiKey={settings.aiApiKey} 
+                  aiApiKey={settings.aiApiKey}
                   onNext={() => handleNext('reflection')} 
-               />
+                />
+              )}
             </div>
             
             <div className={currentScreen === 'reflection' ? 'absolute inset-0 flex' : 'hidden'}>
