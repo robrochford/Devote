@@ -9,9 +9,9 @@ background-command-*.txt
 *.blockmap
 
 # Documentation & Private Notes
-KNOWLEDGE_BASE.md
+# KNOWLEDGE_BASE and CHANGELOG used to be here but are now tracked officially.
+# mobile_plans/ is still ignored as it contains draft strategy.
 mobile_plans/
-CHANGELOG.md
 
 # Build Artifacts & Source Mapping
 node_modules
@@ -24,6 +24,5 @@ fix-icon.js
 generate*.js
 test_ai.mjs
 missing_commentaries.json
-scripts/scrape_mhc.mjs
 clean_log.txt
 test.txt
