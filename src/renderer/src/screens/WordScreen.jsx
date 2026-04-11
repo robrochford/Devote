@@ -8,7 +8,6 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
   const [error, setError] = useState('')
   const [audioUrl, setAudioUrl] = useState('')
   const [isPlaying, setIsPlaying] = useState(false)
-  const [translation, setTranslation] = useState('ESV')
   const [showCommentary, setShowCommentary] = useState(false)
   const [commentaryText, setCommentaryText] = useState('')
   const [generatingCommentary, setGeneratingCommentary] = useState(false)
@@ -34,29 +33,27 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
         }
 
         // ESV specific fetch
-        if (translation === 'ESV') {
-          // CHECK CACHE FIRST: If we have today's reading pre-fetched, use it instantly!
-          if (settings.cachedReading && settings.cachedReading.day === reading.day) {
-            console.log('Using cached reading for Day', reading.day)
-            const data = settings.cachedReading.data
+        // CHECK CACHE FIRST: If we have today's reading pre-fetched, use it instantly!
+        if (settings.cachedReading && settings.cachedReading.day === reading.day) {
+          console.log('Using cached reading for Day', reading.day)
+          const data = settings.cachedReading.data
+          setPassageHtml(data.passages[0])
+          const q2 = encodeURIComponent(reading.reference)
+          setAudioUrl(`http://127.0.0.1:45678/?q=${q2}`)
+        } else {
+          console.log('No cache found or day mismatch, fetching fresh...')
+          const q = encodeURIComponent(reading.reference)
+          const data = await window.electron.ipcRenderer.invoke('fetch-esv', {
+            url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true`,
+            apiKey: apiKey
+          })
+          
+          if (data && data.passages && data.passages.length > 0) {
             setPassageHtml(data.passages[0])
             const q2 = encodeURIComponent(reading.reference)
             setAudioUrl(`http://127.0.0.1:45678/?q=${q2}`)
           } else {
-            console.log('No cache found or day mismatch, fetching fresh...')
-            const q = encodeURIComponent(reading.reference)
-            const data = await window.electron.ipcRenderer.invoke('fetch-esv', {
-              url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true`,
-              apiKey: apiKey
-            })
-            
-            if (data && data.passages && data.passages.length > 0) {
-              setPassageHtml(data.passages[0])
-              const q2 = encodeURIComponent(reading.reference)
-              setAudioUrl(`http://127.0.0.1:45678/?q=${q2}`)
-            } else {
-              setError('The ESV API returned no passage content for this reference.')
-            }
+            setError('The ESV API returned no passage content for this reference.')
           }
         }
 
@@ -82,7 +79,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
     }
 
     loadData()
-  }, [translation, apiKey, retryKey])
+  }, [apiKey, retryKey])
 
   // Pause audio whenever the page becomes hidden (Win+Tab, Alt+Tab, minimize, snooze — everything)
   useEffect(() => {
@@ -158,17 +155,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <select 
-              value={translation}
-              onChange={(e) => setTranslation(e.target.value)}
-              className="bg-zinc-800 border-none text-white text-sm rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-gold-500 outline-none"
-            >
-              <option value="ESV">ESV</option>
-              <option value="NLT">NLT</option>
-              <option value="NKJV">NKJV</option>
-            </select>
-
-            {translation === 'ESV' && audioUrl && (
+            {audioUrl && (
               <button 
                 onClick={toggleAudio}
                 className={`p-2 rounded-full transition-colors ${isPlaying ? 'bg-gold-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700'}`}
@@ -212,15 +199,10 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
                 Try Again
               </button>
             </div>
-          ) : translation === 'ESV' ? (
+          ) : (
             <div 
               className="prose prose-invert prose-p:text-zinc-300 prose-p:leading-loose prose-h2:text-gold-400 prose-h2:font-serif max-w-none pb-20"
               dangerouslySetInnerHTML={{ __html: passageHtml }}
-            />
-          ) : (
-            <webview 
-              src={`https://www.biblegateway.com/passage/?search=${encodeURIComponent(todayReading.reference)}&version=${translation}`} 
-              className="w-full h-full bg-white rounded-lg"
             />
           )}
         </div>
