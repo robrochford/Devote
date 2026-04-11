@@ -9,7 +9,9 @@ background-command-*.txt
 *.blockmap
 
 # Documentation & Private Notes
-# KNOWLEDGE_BASE and CHANGELOG used to be here but are now tracked officially.
+# CHANGELOG used to be here but are now tracked officially.
+knowledge_base.md
+
 # mobile_plans/ is still ignored as it contains draft strategy.
 mobile_plans/
 
