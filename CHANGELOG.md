@@ -9,6 +9,21 @@ All notable changes to the Devote application will be documented in this file.
 - **Concurrent Update Check Stacking**: Added an `isCheckingForUpdate` guard flag so the 4-hour `setInterval` cycle cannot queue multiple overlapping download operations.
 - **Deferred Updates on Tray Apps**: Removed `autoInstallOnAppQuit` — for a tray app users rarely quit, this flag meant updates sat dormant indefinitely. The dialog now explicitly drives the install lifecycle, with `quitAndInstall(false, true)` ensuring Devote relaunches immediately after applying the update.
 - **Startup Check Timing**: Added a 10-second delay to the initial update check to let the BrowserWindow fully settle before the network call fires.
+- **Degraded Prefetch Experience**: Fixed a bug where `prefetchNextReading` fetched the JSON endpoint while `WordScreen` expected HTML. Cached readings now render correctly with full formatting and headers.
+- **Reflection Screen Short-circuit**: Removed a `return null` that was hiding the setup message for users without an AI key.
+- **Tray-App Reflection Stale State**: Rearchitected `ReflectionScreen` to track the specific day number it has fetched for. This ensures the guided reflection questions refresh automatically when the computer wakes on a new day, even if the app was never closed.
+- **Audio State Desync**: Refactored `WordScreen` to drive the play/pause UI state strictly from native `<audio>` element events (`onPlay`/`onPause`). This ensures the UI icon accurately reflects the audio state when paused externally by the Electron main process (e.g., during window blur/hide).
+- **Incomplete Preload Bridge**: Fixed a bug in the IPC bridge where `removeListener` failed to work because the `on` method was creating hidden anonymous wrappers. Implemented a `listenerMap` to correctly track and unregister IPC wrappers.
+- **Blunt Error Recovery**: Replaced `window.location.reload()` in `WordScreen` with a scoped `retryKey` state, allowing users to retry failed fetches without nuking the entire application state.
+
+### Added
+- **Prefetch Resilience**: Added a 3-attempt retry loop with exponential backoff to the scripture prefetching engine.
+- **UI Confirmation**: Added a glowing "✓ Saved" confirmation state to the Settings "Save & Close" button for better user feedback.
+- **Shared Plan Logic**: Extracted the curriculum selection UI into a reusable `PlanSelector` component, significantly reducing code duplication between the Welcome and Year-End screens.
+- **Onboarding UX**: Added explicit validation feedback in the "Custom Library" setup to explain why the "Next" button is disabled when no books are selected.
+
+### Changed
+- **Commentary Priority**: Swapped lookup logic so that custom/AI-generated pastoral reflections take priority over the bundled Matthew Henry Concise JSON dataset.
 
 ## [2026-04-09]
 

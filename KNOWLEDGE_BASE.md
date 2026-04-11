@@ -16,22 +16,29 @@ A repository of technical learnings, architectural decisions, and workspace insi
 - **Learning**: Even with `webSecurity: false`, some external APIs (like ESV) reject requests from `localhost` or `null` origins if CORS headers aren't explicitly provided by the server. 
 - **Pattern**: Always perform external API fetches (especially those requiring secret keys) from the **Main process (Node)** and proxy the data to the renderer via `ipcRenderer.invoke`. This protects API keys and bypasses all browser CORS restrictions.
 
-### 3. "Instant-Feel" UI Lifecycle
+#### 3. "Instant-Feel" UI Lifecycle
 - **Innovation**: To prevent loading spinners when switching devotional screens, we **pre-mount** every screen component on app launch.
-- **Gotcha**: React's `useEffect` hooks in these background-mounted components will fire immediately. 
-- **Fix**: Any "one-time" logic (like marking a devotion as complete or starting a timer) must be gated by an `isActive` prop or similar state check to ensure background components don't execute actions prematurely.
+- **Gotcha**: React's `useEffect` hooks in these background-mounted components will fire immediately on launch.
+- **The Solution**: 
+    1. Any "one-time" logic (like marking a devotion as complete or starting a timer) must be gated by an `isActive` prop or similar state check to ensure background components don't execute actions prematurely.
+    2. For components that track completion across day boundaries (like reflections), use a `useRef` to store the **day number** rather than a boolean. This ensures the component correctly "resets" its state when the day changes, even if it stays mounted in the system tray.
 
 ## Workspace Insights: Electrode Scope Reference
 - **Commonality**: Both projects use `electron-store` for user settings.
 - **Learning**: `electron-store` is synchronous by default. When storing large JSON blobs (like our 365-day commentary), access is best kept in the Main process and passed to the Renderer once, rather than querying the store repeatedly during render cycles.
 
-## Audio Pausing in Kiosk Mode
+## Media & UI State Synchronization
 
+### 1. Audio Pausing in Kiosk Mode
 - **Problem**: Pausing audio when the user switches away (Win+Tab, Alt+Tab) is non-trivial in Electron kiosk mode.
 - **Failed approaches**:
     - `document.visibilitychange` — does NOT fire on focus loss in Electron, only on actual hide/minimize.
     - IPC `window-visibility` events via `blur`/`focus` — unreliable in kiosk mode; event listener chains can silently fail.
 - **The Solution**: Use `webContents.executeJavaScript('document.querySelectorAll("audio").forEach(a => a.pause())')` directly from the main process on the `blur` and `hide` window events. This bypasses the renderer's event system entirely and directly manipulates the DOM.
+
+### 2. Event-Driven Media State
+- **Problem**: When audio is paused externally (via `executeJavaScript`), the React state (`isPlaying`) can get out of sync with the actual DOM element, causing buttons to show "Playing" while silent.
+- **The Solution**: Never drive media UI state via local `toggle()` flags alone. Bind React state to the native `onPlay` and `onPause` events of the `<audio>` tag. This ensures the UI remains the "source of truth" for the actual hardware state regardless of how the pause was triggered.
 
 ## Background Process Architecture
 
@@ -50,13 +57,19 @@ A repository of technical learnings, architectural decisions, and workspace insi
 - **Benefit**: This allows the renderer to remain completely agnostic of the AI backend, making the app much easier to distribute.
 
 ### 2. Shared Registry Keys
-- **Strategy**: For distribution,### 3. Graceful UI Degradation
+- **Strategy**: For distribution, simplify the onboarding process by hardcoding a shared public ESV API key for distribution, while allowing users to override it in settings.
+
+### 3. Secure IPC Listener Mapping
+- **The Problem**: Electron's `contextBridge` often requires wrapping `ipcRenderer.on` calls in anonymous closures to strip the `event` object for security. This makes `removeListener` impossible to use, as the renderer has no reference to the anonymous wrapper function.
+- **The Solution**: Implement a `listenerMap` (Map) inside the preload script. Store the original callback as the key and the wrapped closure as the value. When the renderer calls `removeListener`, look up the wrapper in the map and unregister it correctly. This prevents "ghost" listeners from stacking up in long-running tray applications.
+
+### 4. Graceful UI Degradation
 - If a user hasn't configured an AI API key yet, the `ReflectionScreen` handles this gracefully:
     - It does *not* auto-skip (which would aggressively fire the `completed-today` flag accidentally).
     - It shows a friendly prompt directing them to the Settings cog.
     - It leaves the "I have finished my devotion" button visible so they can proceed purely with the Word and audio if they wish.
 
-### 3. Dynamic Service Detection
+### 5. Dynamic Service Detection
 - **UI Logic**: Use simple string prefix checks (`startsWith`) in the settings UI to show the user exactly which service their key has activated. This builds trust and clarity during the initial setup.
 
 ## Styling & Typography
@@ -121,9 +134,9 @@ A repository of technical learnings, architectural decisions, and workspace insi
 
 ### 2. The `checkForUpdatesAndNotify()` Trap
 - **Observation**: `electron-updater` provides two update check methods: `checkForUpdates()` and `checkForUpdatesAndNotify()`. The second one registers its **own internal `update-downloaded` event handler** that shows a system notification and silently queues installation.
-- **The Conflict**: If you *also* have a custom `autoUpdater.on('update-downloaded', ...)` listener, you now have **two handlers** racing for the same event. The result is non-deterministic: in practice, updates are downloaded but the user prompt is never reliably shown \u2014 especially on Windows where the two mechanisms interfere.
+- **The Conflict**: If you *also* have a custom `autoUpdater.on('update-downloaded', ...)` listener, you now have **two handlers** racing for the same event. The result is non-deterministic: in practice, updates are downloaded but the user prompt is never reliably shown — especially on Windows where the two mechanisms interfere.
 - **The Solution**: Always use `checkForUpdates()` when you want full control of the update UX. This method fires the events but leaves all UI to you. Never mix custom `update-downloaded` handlers with `checkForUpdatesAndNotify()`.
-- **Companion Fix**: Remove `autoUpdater.autoInstallOnAppQuit = true`. For tray apps users rarely quit, this flag keeps updates in a permanent deferred state. Your custom dialog \u2014 using `autoUpdater.quitAndInstall(false, true)` \u2014 is the sole install driver.
+- **Companion Fix**: Remove `autoUpdater.autoInstallOnAppQuit = true`. For tray apps users rarely quit, this flag keeps updates in a permanent deferred state. Your custom dialog — using `autoUpdater.quitAndInstall(false, true)` — is the sole install driver.
 - **Guard Pattern**: Always use an `isCheckingForUpdate` boolean flag. A `setInterval` update check cycle will spawn concurrent downloads without it, leading to corrupted download state.
 
 ### 3. Version Bump Race Conditions
