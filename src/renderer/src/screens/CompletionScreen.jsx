@@ -1,12 +1,24 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Flame, CheckCircle2, Sun } from 'lucide-react'
 
 export default function CompletionScreen({ streak, isActive, alreadyCompleted }) {
+  // Fetch confirmed streak from store after complete-devotion fires.
+  // We don't use the speculative streak+1 approach because electron-store is
+  // synchronous, so a brief setTimeout allows the main process to finish writing
+  // before we re-read. This prevents off-by-one drift.
+  const [confirmedStreak, setConfirmedStreak] = useState(null)
+
   useEffect(() => {
-    if (!isActive || alreadyCompleted) return // Don't re-fire if just viewing the 'completed' state
-    // Tell main process we are done so it updates settings
+    if (!isActive || alreadyCompleted) return
     if (window.electron) {
       window.electron.ipcRenderer.send('complete-devotion')
+
+      // Short delay to let the main process synchronously commit to electron-store
+      setTimeout(() => {
+        window.electron.ipcRenderer.invoke('get-settings').then(s => {
+          setConfirmedStreak(s.currentStreak)
+        })
+      }, 200)
       
       // Auto close after 5 seconds
       const timer = setTimeout(() => {
@@ -16,7 +28,8 @@ export default function CompletionScreen({ streak, isActive, alreadyCompleted })
     }
   }, [isActive, alreadyCompleted])
 
-  const displayStreak = alreadyCompleted ? streak : streak + 1
+  // Use confirmed streak from store once available, otherwise fall back to prop
+  const displayStreak = confirmedStreak ?? (alreadyCompleted ? streak : streak + 1)
 
   if (alreadyCompleted) {
     return (
@@ -75,7 +88,8 @@ export default function CompletionScreen({ streak, isActive, alreadyCompleted })
         "The Lord bless you and keep you; the Lord make his face shine on you and be gracious to you."
       </p>
 
-      {displayStreak > 1 && (
+      {/* Show flame badge from day 1 onwards — fix: was > 1 which hid it on first-ever completion */}
+      {displayStreak > 0 && (
         <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-zinc-900 border border-zinc-800 animate-slide-up" style={{animationDelay: '0.4s', animationFillMode: 'both'}}>
           <Flame className="text-gold-500" size={20} />
           <span className="text-white font-medium">{displayStreak} Day Streak</span>

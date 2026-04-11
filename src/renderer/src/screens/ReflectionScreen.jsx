@@ -5,18 +5,25 @@ export default function ReflectionScreen({ isActive, apiKey, esvApiKey, onNext, 
   const [questions, setQuestions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const fetched = useRef(false)
-
-  // No longer auto-skipping on missing key — show a prompt instead
+  // Store the day number we last fetched for, not just a boolean.
+  // This ensures a new set of questions is generated each calendar day,
+  // even when the component stays mounted in the tray across midnight.
+  const fetchedForDay = useRef(null)
 
   useEffect(() => {
-    // If no keys or already fetched, skip generating
-    if (!apiKey || !esvApiKey || fetched.current) return
+    // If no keys, bail — the JSX will show a friendly "add your key" message
+    if (!apiKey || !esvApiKey) {
+      setLoading(false)
+      return
+    }
 
     async function generateQuestions() {
       setLoading(true)
       try {
         const todayReading = await window.electron.ipcRenderer.invoke('get-today-reading')
+
+        // Guard: only generate once per day, even across tray sleep cycles
+        if (fetchedForDay.current === todayReading.day) return
 
         // Fetch passage text first (simplified for prompt)
         const passageTextData = await window.electron.ipcRenderer.invoke('fetch-esv', {
@@ -36,19 +43,19 @@ export default function ReflectionScreen({ isActive, apiKey, esvApiKey, onNext, 
           .filter(q => q.trim().length > 5)
           .map(q => q.replace(/\*\*/g, '').replace(/^[\d\.\-\*\s]+/, '').trim())
         setQuestions(qArray.slice(0, 2))
+
+        // Record the day we fetched for so we don't re-fetch until tomorrow
+        fetchedForDay.current = todayReading.day
         
       } catch (err) {
         console.error(err)
         setError(`Error: ${err.message || 'Unknown error occurred'}`)
       }
       setLoading(false)
-      fetched.current = true
     }
 
     generateQuestions()
   }, [apiKey])
-
-  if (!apiKey) return null // Handled by effect, but safety render
 
   return (
     <div className="flex-1 flex flex-col items-center p-12 animate-slide-in-right relative h-full overflow-hidden">

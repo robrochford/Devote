@@ -15,6 +15,7 @@ export default function App() {
   const [resetKey, setResetKey] = useState(0)
   const [appVersion, setAppVersion] = useState('')
   const [originalDay, setOriginalDay] = useState(1)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   useEffect(() => {
     // Load initial settings
@@ -39,14 +40,15 @@ export default function App() {
         }
       })
 
-      window.electron.ipcRenderer.on('reset-ui', () => {
+      // Store named listener references so removeListener can target them precisely
+      const onResetUi = () => {
         setResetKey(prev => prev + 1)
         setCurrentScreen('prayer')
         setJustFinished(false)
         window.electron.ipcRenderer.invoke('get-settings').then(s => setSettings(s))
-      })
+      }
 
-      window.electron.ipcRenderer.on('window-show', () => {
+      const onWindowShow = () => {
         window.electron.ipcRenderer.invoke('get-settings').then(s => {
           setSettings(s)
           setCurrentScreen(prev => {
@@ -61,11 +63,14 @@ export default function App() {
             return prev
           })
         })
-      })
+      }
+
+      window.electron.ipcRenderer.on('reset-ui', onResetUi)
+      window.electron.ipcRenderer.on('window-show', onWindowShow)
 
       return () => {
-        window.electron.ipcRenderer.removeAllListeners('reset-ui')
-        window.electron.ipcRenderer.removeAllListeners('window-show')
+        window.electron.ipcRenderer.removeListener('reset-ui', onResetUi)
+        window.electron.ipcRenderer.removeListener('window-show', onWindowShow)
       }
     }
   }, [])
@@ -95,7 +100,7 @@ export default function App() {
     if (window.electron) window.electron.ipcRenderer.send('skip-today')
   }
 
-  const handleSaveSettings = (newSettings) => {
+  const handleSaveSettings = (newSettings, { withFeedback = false } = {}) => {
     const updated = { ...settings, ...newSettings }
     
     // If the user changed the day or unlocked a completed day, 
@@ -112,7 +117,16 @@ export default function App() {
       setJustFinished(false)
     }
     
-    setShowSettings(false)
+    if (withFeedback) {
+      // Show "Saved" confirmation briefly before closing
+      setSaveSuccess(true)
+      setTimeout(() => {
+        setSaveSuccess(false)
+        setShowSettings(false)
+      }, 800)
+    } else {
+      setShowSettings(false)
+    }
   }
 
   return (
@@ -209,10 +223,14 @@ export default function App() {
               </div>
 
               <button 
-                onClick={() => handleSaveSettings(settings)}
-                className="w-full mt-4 px-4 py-3 bg-white text-black font-medium rounded-lg hover:bg-zinc-200 transition-colors"
+                onClick={() => handleSaveSettings(settings, { withFeedback: true })}
+                className={`w-full mt-4 px-4 py-3 font-medium rounded-lg transition-colors ${
+                  saveSuccess
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-white text-black hover:bg-zinc-200'
+                }`}
               >
-                Save & Close
+                {saveSuccess ? '✓ Saved' : 'Save & Close'}
               </button>
 
               <div className="pt-4 text-center">

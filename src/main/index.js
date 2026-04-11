@@ -2,6 +2,8 @@ import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeImage, session, p
 import { autoUpdater } from 'electron-updater'
 import { join } from 'path'
 import { createServer } from 'http'
+import { tmpdir } from 'os'
+import { writeFileSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import Store from 'electron-store'
 
@@ -427,14 +429,15 @@ app.whenReady().then(() => {
     store.set('snoozeUntil', null)
   })
 
-  async function prefetchNextReading(nextDay) {
+  async function prefetchNextReading(nextDay, attempt = 1) {
     try {
       const s = store.store
       const apiKey = s.esvApiKey
       const reading = getReadingForDay(s.planType, s.customBooks, nextDay)
       
       const query = encodeURIComponent(reading.reference)
-      const url = `https://api.esv.org/v3/passage/json/?q=${query}&include-headings=true&include-footnotes=false&include-audio-link=true`
+      // IMPORTANT: Must fetch /html/ (not /json/) to match what WordScreen renders via dangerouslySetInnerHTML
+      const url = `https://api.esv.org/v3/passage/html/?q=${query}&include-headings=true&include-footnotes=false&include-audio-link=false`
       
       const response = await fetch(url, {
         headers: {
@@ -448,7 +451,11 @@ app.whenReady().then(() => {
         console.log(`Successfully prefetched reading for day ${nextDay}`)
       }
     } catch (e) {
-      console.error('Prefetch failed:', e)
+      console.error(`Prefetch failed (attempt ${attempt}):`, e)
+      // Retry up to 3 times with exponential backoff — handles offline-at-completion scenarios
+      if (attempt < 3) {
+        setTimeout(() => prefetchNextReading(nextDay, attempt + 1), 30000 * attempt)
+      }
     }
   }
 

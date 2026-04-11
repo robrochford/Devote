@@ -2,6 +2,11 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 if (process.contextIsolated) {
   try {
+    // Maps the original listener function -> its ipcRenderer wrapper.
+    // Required so removeListener can correctly unregister the specific wrapper
+    // that was registered — not the original func which ipcRenderer never saw.
+    const listenerMap = new Map()
+
     contextBridge.exposeInMainWorld('electron', {
       ipcRenderer: {
         send: (channel, ...args) => {
@@ -13,13 +18,19 @@ if (process.contextIsolated) {
         on: (channel, func) => {
           const validChannels = ['window-visibility', 'reset-ui', 'window-show']
           if (validChannels.includes(channel)) {
-            ipcRenderer.on(channel, (_, ...args) => func(...args))
+            const wrapper = (_, ...args) => func(...args)
+            listenerMap.set(func, wrapper)
+            ipcRenderer.on(channel, wrapper)
           }
         },
         removeListener: (channel, func) => {
           const validChannels = ['window-visibility', 'reset-ui', 'window-show']
           if (validChannels.includes(channel)) {
-            ipcRenderer.removeListener(channel, func)
+            const wrapper = listenerMap.get(func)
+            if (wrapper) {
+              ipcRenderer.removeListener(channel, wrapper)
+              listenerMap.delete(func)
+            }
           }
         },
         invoke: (channel, ...args) => {

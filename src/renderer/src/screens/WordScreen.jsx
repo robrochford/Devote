@@ -13,6 +13,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
   const [commentaryText, setCommentaryText] = useState('')
   const [generatingCommentary, setGeneratingCommentary] = useState(false)
   const [todayReading, setTodayReading] = useState({ day: '', reference: '' })
+  const [retryKey, setRetryKey] = useState(0) // Increment to re-run loadData without a full app reload
   const audioRef = useRef(null)
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
             const data = settings.cachedReading.data
             setPassageHtml(data.passages[0])
             const q2 = encodeURIComponent(reading.reference)
-            setAudioUrl(`http://127.0.0.1:45678/audio?q=${q2}`)
+            setAudioUrl(`http://127.0.0.1:45678/?q=${q2}`)
           } else {
             console.log('No cache found or day mismatch, fetching fresh...')
             const q = encodeURIComponent(reading.reference)
@@ -52,21 +53,22 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
             if (data && data.passages && data.passages.length > 0) {
               setPassageHtml(data.passages[0])
               const q2 = encodeURIComponent(reading.reference)
-              setAudioUrl(`http://127.0.0.1:45678/audio?q=${q2}`)
+              setAudioUrl(`http://127.0.0.1:45678/?q=${q2}`)
             } else {
               setError('The ESV API returned no passage content for this reference.')
             }
           }
         }
 
-        // Commentary Logic
+        // Commentary Logic — check custom/AI-generated first, then bundled MHC
         const customStore = await window.electron.ipcRenderer.invoke('get-custom-commentaries')
         const commentaryKey = `${reading.book} ${reading.startChapter}`
         
-        if (matthewHenry[commentaryKey]) {
-          setCommentaryText(matthewHenry[commentaryKey])
-        } else if (customStore[commentaryKey]) {
+        if (customStore[commentaryKey]) {
+          // AI-generated or user-edited commentaries take priority over the bundled data
           setCommentaryText(customStore[commentaryKey])
+        } else if (matthewHenry[commentaryKey]) {
+          setCommentaryText(matthewHenry[commentaryKey])
         } else {
           setCommentaryText('')
         }
@@ -80,7 +82,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
     }
 
     loadData()
-  }, [translation, apiKey])
+  }, [translation, apiKey, retryKey])
 
   // Pause audio whenever the page becomes hidden (Win+Tab, Alt+Tab, minimize, snooze — everything)
   useEffect(() => {
@@ -102,7 +104,8 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
     } else {
       audioRef.current.play()
     }
-    setIsPlaying(!isPlaying)
+    // Note: isPlaying state is driven by the audio element's onPlay/onPause events below,
+    // not toggled here — ensures correctness when audio is paused externally (e.g. from main process).
   }
 
   const handleStudyClick = async () => {
@@ -172,7 +175,14 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
                 title="Play Audio"
               >
                 <Headphones size={18} />
-                <audio ref={audioRef} src={audioUrl} onEnded={() => setIsPlaying(false)} className="hidden" />
+                <audio
+                  ref={audioRef}
+                  src={audioUrl}
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                  onEnded={() => setIsPlaying(false)}
+                  className="hidden"
+                />
               </button>
             )}
 
@@ -196,7 +206,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
             <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
               <p className="text-red-400 text-sm leading-relaxed">{error}</p>
               <button
-                onClick={() => { setError(''); setLoading(true); window.location.reload() }}
+                onClick={() => { setError(''); setRetryKey(k => k + 1) }}
                 className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors"
               >
                 Try Again
