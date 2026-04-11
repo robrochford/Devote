@@ -48,26 +48,50 @@ app.setLoginItemSettings({
 })
 
 // Configure Auto-Updater
+// NOTE: We use checkForUpdates() (NOT checkForUpdatesAndNotify()) because we
+// have our own update-downloaded handler. Using checkForUpdatesAndNotify()
+// registers a second internal handler that races with ours and causes updates
+// to silently stall — especially in tray apps where the app is never quit.
 autoUpdater.autoDownload = true
-autoUpdater.autoInstallOnAppQuit = true
+// autoInstallOnAppQuit is intentionally NOT set — we use our own dialog to
+// prompt the user immediately so updates aren't silently deferred forever.
+
+let isCheckingForUpdate = false
 
 autoUpdater.on('update-downloaded', (info) => {
+  isCheckingForUpdate = false
   dialog.showMessageBox({
     type: 'info',
-    title: 'Update Ready',
-    message: `A new version of Devote (${info.version}) is ready. Restart now to apply?`,
-    buttons: ['Restart', 'Later']
+    title: 'Devote Update Ready',
+    message: `Version ${info.version} is ready to install.`,
+    detail: 'Restart now to apply the update, or it will install automatically the next time Devote starts.',
+    buttons: ['Restart Now', 'Later'],
+    defaultId: 0,
+    cancelId: 1
   }).then((result) => {
-    if (result.response === 0) autoUpdater.quitAndInstall()
+    if (result.response === 0) {
+      autoUpdater.quitAndInstall(false, true) // isSilent=false, isForceRunAfter=true
+    }
   })
 })
 
+autoUpdater.on('update-not-available', () => {
+  isCheckingForUpdate = false
+})
+
+autoUpdater.on('error', (err) => {
+  isCheckingForUpdate = false
+  console.error('Update check error:', err)
+})
+
 function checkForUpdates() {
-  if (app.isPackaged) {
-    autoUpdater.checkForUpdatesAndNotify().catch(err => {
-       console.error('Update check failed:', err)
-    })
-  }
+  if (!app.isPackaged) return
+  if (isCheckingForUpdate) return // Prevent concurrent checks stacking up
+  isCheckingForUpdate = true
+  autoUpdater.checkForUpdates().catch(err => {
+    isCheckingForUpdate = false
+    console.error('Update check failed:', err)
+  })
 }
 
 
@@ -597,11 +621,11 @@ app.whenReady().then(() => {
     return true
   })
 
-  // Background update check cycle (every 4 hours)
-  setInterval(() => checkForUpdates(), 4 * 60 * 60 * 1000)
+  // Initial check on startup — short delay to let the window settle first
+  setTimeout(() => checkForUpdates(), 10000)
 
-  // Initial check on startup
-  checkForUpdates()
+  // Background update check cycle (every 4 hours) — guard prevents concurrent stacking
+  setInterval(() => checkForUpdates(), 4 * 60 * 60 * 1000)
 })
 
 

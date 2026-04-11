@@ -119,7 +119,14 @@ A repository of technical learnings, architectural decisions, and workspace insi
     2. **Interaction Trigger**: Trigger a check whenever the user brings the app window to the front (Tray Click or Re-launching from desktop).
     3. **Background Interval**: Implement a `setInterval` in the Main process (e.g., every 4 hours) to silently probe for updates while the app is idling in the tray.
 
-### 2. Version Bump Race Conditions
+### 2. The `checkForUpdatesAndNotify()` Trap
+- **Observation**: `electron-updater` provides two update check methods: `checkForUpdates()` and `checkForUpdatesAndNotify()`. The second one registers its **own internal `update-downloaded` event handler** that shows a system notification and silently queues installation.
+- **The Conflict**: If you *also* have a custom `autoUpdater.on('update-downloaded', ...)` listener, you now have **two handlers** racing for the same event. The result is non-deterministic: in practice, updates are downloaded but the user prompt is never reliably shown \u2014 especially on Windows where the two mechanisms interfere.
+- **The Solution**: Always use `checkForUpdates()` when you want full control of the update UX. This method fires the events but leaves all UI to you. Never mix custom `update-downloaded` handlers with `checkForUpdatesAndNotify()`.
+- **Companion Fix**: Remove `autoUpdater.autoInstallOnAppQuit = true`. For tray apps users rarely quit, this flag keeps updates in a permanent deferred state. Your custom dialog \u2014 using `autoUpdater.quitAndInstall(false, true)` \u2014 is the sole install driver.
+- **Guard Pattern**: Always use an `isCheckingForUpdate` boolean flag. A `setInterval` update check cycle will spawn concurrent downloads without it, leading to corrupted download state.
+
+### 3. Version Bump Race Conditions
 - **Observation**: If using automated versioning (like a GitHub Action that bumps `package.json` on push), manual pushes that *already* contain a version bump can trigger the automation twice, leading to jumped version numbers (e.g., `1.2.6` -> `1.2.7`).
 - **Best Practice**: Trust the automation. If a repository has `autobump.yml` active, developers should focus on pushing clean commits to `main` and let the runner handle the `v*` tagging and release lifecycle.
 

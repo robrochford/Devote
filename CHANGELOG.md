@@ -2,6 +2,14 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-04-11]
+
+### Fixed
+- **Auto-Updater Not Reaching Users**: Resolved a critical bug where installed clients on versions 1.2.7+ were not receiving update prompts. Root cause: `checkForUpdatesAndNotify()` registers its own internal `update-downloaded` handler that conflicts with our custom `dialog.showMessageBox` listener, causing both to race and silently stall. Switched to `checkForUpdates()` to give our handler sole ownership of the update lifecycle.
+- **Concurrent Update Check Stacking**: Added an `isCheckingForUpdate` guard flag so the 4-hour `setInterval` cycle cannot queue multiple overlapping download operations.
+- **Deferred Updates on Tray Apps**: Removed `autoInstallOnAppQuit` — for a tray app users rarely quit, this flag meant updates sat dormant indefinitely. The dialog now explicitly drives the install lifecycle, with `quitAndInstall(false, true)` ensuring Devote relaunches immediately after applying the update.
+- **Startup Check Timing**: Added a 10-second delay to the initial update check to let the BrowserWindow fully settle before the network call fires.
+
 ## [2026-04-09]
 
 ### Added
