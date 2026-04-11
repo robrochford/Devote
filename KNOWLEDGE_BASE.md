@@ -70,7 +70,7 @@ A repository of technical learnings, architectural decisions, and workspace insi
     - It leaves the "I have finished my devotion" button visible so they can proceed purely with the Word and audio if they wish.
 
 ### 5. Dynamic Service Detection
-- **UI Logic**: Use simple string prefix checks (`startsWith`) in the settings UI to show the user exactly which service their key has activated. This builds trust and clarity during the initial setup.
+- **UI Logic**: Use simple string prefix checks (`startsWith`) in the settings UI should show the user exactly which service their key has activated. This builds trust and clarity during the initial setup.
 
 ## Styling & Typography
 
@@ -109,7 +109,7 @@ A repository of technical learnings, architectural decisions, and workspace insi
 - **The Solution**: Structurally limit interactions contextually. Specifically, forcefully hide global entry points (like Settings Cogs) directly inside the React tree `settings.hasCompletedOnboarding && (<Settings />)` to completely quarantine the setup phase from the core app functionalities.
 
 ### 3. Graceful Kiosk Mitigation
-- **Observation**: If you permanently lock Kiosk Mode down to `alwaysOnTop: true`, users might get trapped during setup phases that require grabbing third-party API keys from a browser window behind it. However, forcibly un-locking OS Kiosk mode natively using Electron methods (`setKiosk(false)` against transparent-mode bounds) is incredibly error-prone and jitter-heavy on Windows.
+- **Observation**: If you permanently lock Kiosk Mode down to `alwaysOnTop: true`, users might get trapped during setup phases that require grabbing third-party API keys from a browser window behind it. However, forcefully un-locking OS Kiosk mode natively using Electron methods (`setKiosk(false)` against transparent-mode bounds) is incredibly error-prone and jitter-heavy on Windows.
 - **The Solution**: Rely on the native `minimize()` command instead! By adding a targeted "Minimize App" button and triggering a `minimize-window` IPC bridge, users can cleanly bounce the app right into their system tray manually or via automatic `kioskWindow.on('blur')` triggers. Combined with an explicit `.on('restore', () => kioskWindow.setAlwaysOnTop(true) ...)` intercept, the app can then bounce perfectly back to the extreme top front of the Z-index exactly when requested.
 
 ## Distribution & Repository Management
@@ -123,14 +123,22 @@ A repository of technical learnings, architectural decisions, and workspace insi
 - **Learning**: GitHub has a strict 100MB file limit for standard pushes. Compiled Electron `.exe` files and `node_modules` folders frequently exceed this.
 - **Best Practice**: Always maintain a robust `.gitignore`. Never track `dist/`, `out/`, or `.eb-cache/`. This keeps the repository focused purely on source code, while the `dist/` artifacts are handled separately as GitHub Release attachments.
 
-## Auto-Update Strategy for "Always-On" Apps
+## Update Lifecycle for Tray Apps
 
 ### 1. The Tray-Stale Problem
 - **Observation**: Users of "Soft Kiosk" and tray applications rarely quit the app. This creates a "stale app" scenario where `autoUpdater.checkForUpdatesAndNotify()`—typically called once on launch—is never triggered again.
-- **The Solution**: A three-pronged update trigger:
+- **The Solution**: A multi-pronged update trigger:
     1. **Startup Check**: Standard check when the app boots.
     2. **Interaction Trigger**: Trigger a check whenever the user brings the app window to the front (Tray Click or Re-launching from desktop).
-    3. **Background Interval**: Implement a `setInterval` in the Main process (e.g., every 4 hours) to silently probe for updates while the app is idling in the tray.
+    3. **Background Interval**: Implement a `setInterval` in the Main process (e.g., every 1 hour) to silently probe for updates while the app is idling in the tray. Longer intervals (4h+) often cause updates to be deferred indefinitely if the machine goes to sleep.
+
+### 4. Power-State Awareness (Wake Check)
+- **The Problem**: If a release is pushed while a user's computer is asleep, the `setInterval` logic might drift or skip, causing the update to wait hours before being detected.
+- **The Solution**: Listen to Electron `powerMonitor` 'resume' event. Re-trigger `checkForUpdates()` with a 5-10 second delay (to allow the network interface to reconnect) immediately upon wake.
+
+### 5. UI-Bound Update Notifications
+- **The Problem**: OS-level dialogs (`showMessageBox`) are easily buried or accidentally dismissed.
+- **The Solution**: When `update-downloaded` fires in Main, send an IPC message (`update-ready`) to the Renderer. The UI should display a persistent, non-blocking notification (e.g., a pulsing badge near the settings cog) to ensure the user knows an update is pending without forcing an immediate restart.
 
 ### 2. The `checkForUpdatesAndNotify()` Trap
 - **Observation**: `electron-updater` provides two update check methods: `checkForUpdates()` and `checkForUpdatesAndNotify()`. The second one registers its **own internal `update-downloaded` event handler** that shows a system notification and silently queues installation.
@@ -142,6 +150,10 @@ A repository of technical learnings, architectural decisions, and workspace insi
 ### 3. Version Bump Race Conditions
 - **Observation**: If using automated versioning (like a GitHub Action that bumps `package.json` on push), manual pushes that *already* contain a version bump can trigger the automation twice, leading to jumped version numbers (e.g., `1.2.6` -> `1.2.7`).
 - **Best Practice**: Trust the automation. If a repository has `autobump.yml` active, developers should focus on pushing clean commits to `main` and let the runner handle the `v*` tagging and release lifecycle.
+
+### 6. Prefetch Consistency
+- **The Pitfall**: ESV's `/json/` and `/html/` endpoints return data formatted differently. Caching from one while rendering from another leads to broken layouts (e.g., raw text vs formatted HTML).
+- **The Solution**: Ensure the prefetching engine (server-side) and reading screen (client-side) hit the exact same endpoint with identical parameters to ensure local cache parity.
 
 ## Large-Scale Local Data Scraping
 
@@ -157,6 +169,3 @@ A repository of technical learnings, architectural decisions, and workspace insi
 ### 1. The Startup Race
 - **Observation**: Applications that launch immediately on OS startup or wake (like Devote) often encounter `TypeError: fetch failed` exceptions. This happens because the application's code executes a few milliseconds before the system's DNS or WiFi handshake has been completed.
 - **The Solution: Prefetching Buffer**: Do not wait for the next session to fetch data. When the user signals that they are finished with *today*, the app assumes they have a stable connection and immediately fetches *tomorrow's* metadata in the background. Storing this payload locally turns a high-risk network dependency into a zero-latency disk read on the next launch.
-
-
-
