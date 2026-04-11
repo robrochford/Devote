@@ -8,9 +8,8 @@ background-command-*.txt
 *.nupkg
 *.blockmap
 
-# Documentation & Private Notes
-# CHANGELOG used to be here but are now tracked officially.
-knowledge_base.md
+# Documentation & Private Notes (Local Only)
+KNOWLEDGE_BASE.md
 
 # mobile_plans/ is still ignored as it contains draft strategy.
 mobile_plans/
