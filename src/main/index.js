@@ -62,6 +62,13 @@ let isCheckingForUpdate = false
 
 autoUpdater.on('update-downloaded', (info) => {
   isCheckingForUpdate = false
+  
+  // Notify any open renderer windows that an update is ready (for UI badges)
+  if (kioskWindow && !kioskWindow.isDestroyed()) {
+    kioskWindow.webContents.send('update-ready', info.version)
+  }
+
+  // Ensure the dialog is visible and top-level even if the app is in the tray
   dialog.showMessageBox({
     type: 'info',
     title: 'Devote Update Ready',
@@ -69,10 +76,11 @@ autoUpdater.on('update-downloaded', (info) => {
     detail: 'Restart now to apply the update, or it will install automatically the next time Devote starts.',
     buttons: ['Restart Now', 'Later'],
     defaultId: 0,
-    cancelId: 1
+    cancelId: 1,
+    noLink: true // Windows specific: prevents common UI issues with dialog parenting
   }).then((result) => {
     if (result.response === 0) {
-      autoUpdater.quitAndInstall(false, true) // isSilent=false, isForceRunAfter=true
+      autoUpdater.quitAndInstall(false, true)
     }
   })
 })
@@ -617,6 +625,11 @@ app.whenReady().then(() => {
     }
   })
 
+  ipcMain.handle('check-for-updates', () => {
+    checkForUpdates()
+    return true
+  })
+
   ipcMain.handle('get-custom-commentaries', () => {
     return store.get('customCommentaries') || {}
   })
@@ -631,8 +644,15 @@ app.whenReady().then(() => {
   // Initial check on startup — short delay to let the window settle first
   setTimeout(() => checkForUpdates(), 10000)
 
-  // Background update check cycle (every 4 hours) — guard prevents concurrent stacking
-  setInterval(() => checkForUpdates(), 4 * 60 * 60 * 1000)
+  // Background update check cycle (every hour) — guard prevents concurrent stacking
+  // Switched from 4h to 1h to ensure updates are caught "straight away" for long-running tray apps
+  setInterval(() => checkForUpdates(), 1 * 60 * 60 * 1000)
+
+  // Check for updates when the computer wakes up from sleep
+  powerMonitor.on('resume', () => {
+    console.log('Power resumed, checking for updates...')
+    setTimeout(() => checkForUpdates(), 5000) // 5s delay to let network reconnect
+  })
 })
 
 

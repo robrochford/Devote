@@ -16,7 +16,7 @@ if (process.contextIsolated) {
           }
         },
         on: (channel, func) => {
-          const validChannels = ['window-visibility', 'reset-ui', 'window-show']
+          const validChannels = ['window-visibility', 'reset-ui', 'window-show', 'update-ready']
           if (validChannels.includes(channel)) {
             const wrapper = (_, ...args) => func(...args)
             listenerMap.set(func, wrapper)
@@ -24,7 +24,7 @@ if (process.contextIsolated) {
           }
         },
         removeListener: (channel, func) => {
-          const validChannels = ['window-visibility', 'reset-ui', 'window-show']
+          const validChannels = ['window-visibility', 'reset-ui', 'window-show', 'update-ready']
           if (validChannels.includes(channel)) {
             const wrapper = listenerMap.get(func)
             if (wrapper) {
@@ -34,7 +34,13 @@ if (process.contextIsolated) {
           }
         },
         invoke: (channel, ...args) => {
-          const validChannels = ['get-settings', 'save-settings', 'fetch-esv', 'fetch-esv-audio', 'fetch-ai', 'get-custom-commentaries', 'save-custom-commentary', 'get-today-reading', 'get-all-books', 'get-version']
+          const validChannels = [
+            'get-settings', 'save-settings',
+            'fetch-esv', 'fetch-esv-audio', 'fetch-ai',
+            'get-custom-commentaries', 'save-custom-commentary',
+            'get-today-reading', 'get-all-books', 'get-version',
+            'check-for-updates'
+          ]
           if (validChannels.includes(channel)) {
             return ipcRenderer.invoke(channel, ...args)
           }

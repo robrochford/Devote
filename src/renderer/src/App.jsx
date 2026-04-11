@@ -16,6 +16,9 @@ export default function App() {
   const [appVersion, setAppVersion] = useState('')
   const [originalDay, setOriginalDay] = useState(1)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [updateReady, setUpdateReady] = useState(false)
+  const [updateVersion, setUpdateVersion] = useState('')
+  const [checkingUpdate, setCheckingUpdate] = useState(false)
 
   useEffect(() => {
     // Load initial settings
@@ -65,12 +68,19 @@ export default function App() {
         })
       }
 
+      const onUpdateReady = (version) => {
+        setUpdateReady(true)
+        setUpdateVersion(version)
+      }
+
       window.electron.ipcRenderer.on('reset-ui', onResetUi)
       window.electron.ipcRenderer.on('window-show', onWindowShow)
+      window.electron.ipcRenderer.on('update-ready', onUpdateReady)
 
       return () => {
         window.electron.ipcRenderer.removeListener('reset-ui', onResetUi)
         window.electron.ipcRenderer.removeListener('window-show', onWindowShow)
+        window.electron.ipcRenderer.removeListener('update-ready', onUpdateReady)
       }
     }
   }, [])
@@ -134,17 +144,31 @@ export default function App() {
       {/* App Container */}
       <div className="h-[750px] transition-all duration-700 bg-zinc-900/80 backdrop-blur-xl border border-zinc-700/50 rounded-3xl shadow-2xl overflow-hidden relative">
         
-        {/* Settings Button */}
+        {/* Settings Button + Update Badge */}
         {settings.hasCompletedOnboarding && (
-          <button 
-            onClick={() => {
-              if (!showSettings) setOriginalDay(settings.currentPlanDay)
-              setShowSettings(!showSettings)
-            }}
-            className="absolute bottom-6 left-6 p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors z-[100] opacity-0 group-hover:opacity-100"
-          >
-            {showSettings ? <X size={20} /> : <Settings size={20} />}
-          </button>
+          <div className="absolute bottom-6 left-6 z-[100]">
+            <button 
+              onClick={() => {
+                if (!showSettings) setOriginalDay(settings.currentPlanDay)
+                setShowSettings(!showSettings)
+              }}
+              className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+            >
+              {showSettings ? <X size={20} /> : <Settings size={20} />}
+            </button>
+            {updateReady && !showSettings && (
+              <div
+                className="absolute -top-8 left-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 border border-green-500/40 text-green-400 text-[10px] font-medium whitespace-nowrap cursor-pointer animate-pulse"
+                onClick={() => {
+                  setOriginalDay(settings.currentPlanDay)
+                  setShowSettings(true)
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0"></span>
+                Update {updateVersion} ready
+              </div>
+            )}
+          </div>
         )}
 
         {/* Settings Panel */}
@@ -233,8 +257,28 @@ export default function App() {
                 {saveSuccess ? '✓ Saved' : 'Save & Close'}
               </button>
 
-              <div className="pt-4 text-center">
+              <div className="pt-4 flex items-center justify-between">
                 <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Version {appVersion}</span>
+                {updateReady ? (
+                  <span className="text-[10px] text-green-400 font-medium animate-pulse">
+                    v{updateVersion} downloaded — click Restart Now in the update dialog.
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (window.electron) {
+                        setCheckingUpdate(true)
+                        window.electron.ipcRenderer.invoke('check-for-updates').then(() => {
+                          setTimeout(() => setCheckingUpdate(false), 4000)
+                        })
+                      }
+                    }}
+                    disabled={checkingUpdate}
+                    className="text-[10px] text-zinc-600 hover:text-zinc-300 transition-colors disabled:opacity-50"
+                  >
+                    {checkingUpdate ? 'Checking...' : 'Check for updates'}
+                  </button>
+                )}
               </div>
             </div>
           </div>
