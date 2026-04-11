@@ -1,6 +1,6 @@
 {
   "name": "devote",
-  "version": "1.2.17",
+  "version": "1.2.18",
   "description": "A distraction-free daily Christian devotional app",
   "main": "./out/main/index.js",
   "author": "Devote",
