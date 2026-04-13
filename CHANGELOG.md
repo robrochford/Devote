@@ -22,6 +22,7 @@ All notable changes to the Devote application will be documented in this file.
 - **Plan Reset Prefetching**: `PlanCompleteScreen` now correctly fetches the opening commentaries and displays a "Preparing..." state when setting up a new custom plan, matching `WelcomeScreen` behavior.
 - **Alternating Track Reliability**: `buildAlternatingTrack` now uses a strict two-slot rolling queue strategy. This guarantees only two books are alternated at any given time, regardless of how many custom books are selected, and fixes a race condition where sequences could drop books early.
 - **AI Key State Desync**: Fixed an issue where the Reflection Screen would crash with "No AI API Key found" if a user typed an API Key into the settings modal but had not yet clicked "Save & Close". The renderer now explicitly passes the live key to the main process for the fetch request.
+- **Anthropic 404 Error Fallback**: Added a model fallback loop for Anthropic API keys. If a user's API tier does not yet support `claude-3-5-haiku-20241022` (returning a 404), the engine will automatically downgrade to `claude-3-haiku-20240307` to ensure reflections continue to generate without error.
 
 ## [2026-04-11]
 

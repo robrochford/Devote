@@ -630,31 +630,69 @@ app.whenReady().then(() => {
       
       const keyToUse = rawKey.trim()
 
-      // 1. Identify Provider
-      let provider = 'google'
-      let url = ''
-      let headers = { 'Content-Type': 'application/json' }
-      let body = {}
-
+      // 1. Identify Provider and Fetch
       if (keyToUse.startsWith('sk-ant')) {
-        provider = 'anthropic'
-        url = 'https://api.anthropic.com/v1/messages'
-        headers['x-api-key'] = keyToUse
-        headers['anthropic-version'] = '2023-06-01'
-        headers['dangerously-allow-browser'] = 'true'
-        body = {
-          model: 'claude-3-5-haiku-20241022',
-          max_tokens: 1024,
-          messages: [{ role: 'user', content: prompt }]
+        const anthropicModels = [
+          'claude-3-5-haiku-20241022',
+          'claude-3-haiku-20240307'
+        ]
+        const anthropicHeaders = {
+          'Content-Type': 'application/json',
+          'x-api-key': keyToUse,
+          'anthropic-version': '2023-06-01',
+          'dangerously-allow-browser': 'true'
         }
+
+        for (const model of anthropicModels) {
+          console.log(`Trying Anthropic model: ${model}`)
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: anthropicHeaders,
+            body: JSON.stringify({
+              model: model,
+              max_tokens: 1024,
+              messages: [{ role: 'user', content: prompt }]
+            })
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            return data.content[0].text
+          }
+
+          const status = response.status
+          if (status === 404 || status === 503 || status === 429) {
+            console.log(`Anthropic ${model} returned ${status}, trying next...`)
+            continue
+          }
+
+          const errorText = await response.text()
+          throw new Error(`AI Provider Error (${status}): ${errorText}`)
+        }
+        throw new Error('All Anthropic Haiku models are currently unavailable. Check your API tier.')
+
       } else if (keyToUse.startsWith('sk-')) {
-        provider = 'openai'
-        url = 'https://api.openai.com/v1/chat/completions'
-        headers['Authorization'] = `Bearer ${keyToUse}`
-        body = {
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }]
+        console.log(`Trying OpenAI model: gpt-4o-mini`)
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${keyToUse}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }]
+          })
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          return data.choices[0].message.content
         }
+        
+        const errorText = await response.text()
+        throw new Error(`AI Provider Error (${response.status}): ${errorText}`)
+
       } else {
         // Google Gemini — try a chain of models, falling back on 503/429
         const geminiModels = [
@@ -665,14 +703,13 @@ app.whenReady().then(() => {
         ]
 
         for (const model of geminiModels) {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`
-          const geminiBody = { contents: [{ parts: [{ text: prompt }] }] }
-
           console.log(`Trying Gemini model: ${model}`)
-          const response = await fetch(geminiUrl, {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`, {
             method: 'POST',
-            headers,
-            body: JSON.stringify(geminiBody)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
           })
 
           if (response.ok) {
@@ -681,39 +718,17 @@ app.whenReady().then(() => {
           }
 
           const status = response.status
-          if (status === 503 || status === 429) {
-            // Overloaded or quota hit — try next model
+          if (status === 503 || status === 429 || status === 404) {
             console.log(`Gemini ${model} returned ${status}, trying next...`)
             continue
           }
 
-          // Any other error (401, 400 etc) — fail immediately
           const errorText = await response.text()
           throw new Error(`AI Provider Error (${status}): ${errorText}`)
         }
 
         throw new Error('All Gemini models are currently unavailable. Please try again later.')
       }
-
-      // Non-Google providers: single attempt
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(body)
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`AI Provider Error (${response.status}): ${errorText}`)
-      }
-
-      const data = await response.json()
-
-      // 2. Normalize Response
-      if (provider === 'openai') return data.choices[0].message.content
-      if (provider === 'anthropic') return data.content[0].text
-
-      throw new Error('Unknown Provider')
     } catch (e) {
       console.error(e)
       throw e
