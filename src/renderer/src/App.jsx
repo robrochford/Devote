@@ -92,8 +92,9 @@ export default function App() {
 
   const getProvider = (key) => {
     if (!key) return 'Any AI Key (Gemini, OpenAI, Claude)'
-    if (key.startsWith('sk-ant')) return 'Detected: Anthropic (Claude 3.5 Haiku)'
-    if (key.startsWith('sk-')) return 'Detected: OpenAI (GPT-4o mini)'
+    const cleanKey = key.trim()
+    if (cleanKey.startsWith('sk-ant')) return 'Detected: Anthropic (Claude 3.5 Haiku)'
+    if (cleanKey.startsWith('sk-')) return 'Detected: OpenAI (GPT-4o mini)'
     return 'Detected: Google (Gemini 3 Flash)'
   }
 

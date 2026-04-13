@@ -625,8 +625,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle('fetch-ai', async (_, { prompt, apiKey }) => {
     try {
-      const keyToUse = apiKey || store.get('aiApiKey')
-      if (!keyToUse) throw new Error('No AI API Key found in settings')
+      let rawKey = apiKey || store.get('aiApiKey')
+      if (!rawKey) throw new Error('No AI API Key found in settings')
+      
+      const keyToUse = rawKey.trim()
 
       // 1. Identify Provider
       let provider = 'google'
