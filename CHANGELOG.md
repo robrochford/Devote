@@ -21,6 +21,7 @@ All notable changes to the Devote application will be documented in this file.
 - **Commentary Reference Stored**: `prefetchNextReading` now persists the passage `reference` alongside the cached reading so future invalidation checks can be exact.
 - **Plan Reset Prefetching**: `PlanCompleteScreen` now correctly fetches the opening commentaries and displays a "Preparing..." state when setting up a new custom plan, matching `WelcomeScreen` behavior.
 - **Alternating Track Reliability**: `buildAlternatingTrack` now uses a strict two-slot rolling queue strategy. This guarantees only two books are alternated at any given time, regardless of how many custom books are selected, and fixes a race condition where sequences could drop books early.
+- **AI Key State Desync**: Fixed an issue where the Reflection Screen would crash with "No AI API Key found" if a user typed an API Key into the settings modal but had not yet clicked "Save & Close". The renderer now explicitly passes the live key to the main process for the fetch request.
 
 ## [2026-04-11]
 

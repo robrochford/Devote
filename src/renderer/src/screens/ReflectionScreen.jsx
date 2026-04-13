@@ -35,7 +35,8 @@ export default function ReflectionScreen({ isActive, apiKey, esvApiKey, onNext, 
         const prompt = `You are a thoughtful pastoral assistant. Read the following passage: ${text}. Generate exactly two deep, thought-provoking reflection questions focusing on personal application, spiritual growth, and deep contemplation based on this text. Do not include introductory text, just provide the two questions formatted clearly.`
 
         const textResponse = await window.electron.ipcRenderer.invoke('fetch-ai', {
-          prompt: prompt
+          prompt: prompt,
+          apiKey: apiKey
         })
         
         // Parse into array, stripping any markdown bullets or numbers like "1. " or "* "

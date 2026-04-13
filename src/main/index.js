@@ -623,10 +623,10 @@ app.whenReady().then(() => {
     }
   })
 
-  ipcMain.handle('fetch-ai', async (_, { prompt }) => {
+  ipcMain.handle('fetch-ai', async (_, { prompt, apiKey }) => {
     try {
-      const apiKey = store.get('aiApiKey')
-      if (!apiKey) throw new Error('No AI API Key found in settings')
+      const keyToUse = apiKey || store.get('aiApiKey')
+      if (!keyToUse) throw new Error('No AI API Key found in settings')
 
       // 1. Identify Provider
       let provider = 'google'
@@ -634,10 +634,10 @@ app.whenReady().then(() => {
       let headers = { 'Content-Type': 'application/json' }
       let body = {}
 
-      if (apiKey.startsWith('sk-ant')) {
+      if (keyToUse.startsWith('sk-ant')) {
         provider = 'anthropic'
         url = 'https://api.anthropic.com/v1/messages'
-        headers['x-api-key'] = apiKey
+        headers['x-api-key'] = keyToUse
         headers['anthropic-version'] = '2023-06-01'
         headers['dangerously-allow-browser'] = 'true'
         body = {
@@ -645,10 +645,10 @@ app.whenReady().then(() => {
           max_tokens: 1024,
           messages: [{ role: 'user', content: prompt }]
         }
-      } else if (apiKey.startsWith('sk-')) {
+      } else if (keyToUse.startsWith('sk-')) {
         provider = 'openai'
         url = 'https://api.openai.com/v1/chat/completions'
-        headers['Authorization'] = `Bearer ${apiKey}`
+        headers['Authorization'] = `Bearer ${keyToUse}`
         body = {
           model: 'gpt-4o-mini',
           messages: [{ role: 'user', content: prompt }]
@@ -663,7 +663,7 @@ app.whenReady().then(() => {
         ]
 
         for (const model of geminiModels) {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`
           const geminiBody = { contents: [{ parts: [{ text: prompt }] }] }
 
           console.log(`Trying Gemini model: ${model}`)
