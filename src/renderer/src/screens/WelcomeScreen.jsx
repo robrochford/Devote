@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 import PlanSelector from '../components/PlanSelector'
 
 export default function WelcomeScreen({ onComplete }) {
@@ -7,6 +8,7 @@ export default function WelcomeScreen({ onComplete }) {
   const [customBooks, setCustomBooks] = useState([])
   const [allBooks, setAllBooks] = useState([])
   const [aiApiKey, setAiApiKey] = useState('')
+  const [isFinishing, setIsFinishing] = useState(false)
 
   useEffect(() => {
     if (window.electron) {
@@ -24,7 +26,20 @@ export default function WelcomeScreen({ onComplete }) {
     }
   }
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    setIsFinishing(true)
+    
+    if (planType === 'custom' && window.electron) {
+      try {
+        await window.electron.ipcRenderer.invoke('prefetch-mhc-commentaries', {
+          customBooks: customBooks,
+          startDay: 1
+        })
+      } catch (e) {
+        console.error("Prefetch failed", e)
+      }
+    }
+
     onComplete({
       planType,
       customBooks: planType === 'devote' ? [] : customBooks,
@@ -106,9 +121,17 @@ export default function WelcomeScreen({ onComplete }) {
               </button>
               <button 
                 onClick={handleFinish}
-                className="px-8 py-3 bg-gold-500 text-black font-medium rounded-lg hover:bg-gold-400 transition-colors"
+                disabled={isFinishing}
+                className="px-8 py-3 bg-gold-500 text-black font-medium rounded-lg hover:bg-gold-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                Start Devotion
+                {isFinishing ? (
+                  <>
+                    <Loader2 className="animate-spin text-black" size={20} />
+                    Preparing...
+                  </>
+                ) : (
+                  'Start Devotion'
+                )}
               </button>
             </div>
         </div>

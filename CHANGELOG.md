@@ -2,6 +2,16 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-04-13]
+
+### Added
+- **Alternating Custom Book Logic**: Custom reading plans now alternate daily between books (A -> B -> A) rather than linear sequencing. Supports a rolling queue where exhausted books are replaced by the next selection.
+- **MHC Background Prefetching**: Implementation of a background scraper for Matthew Henry Concise commentaries. When a custom plan is selected, the app now pulls missing chapters from BibleHub in the background and stores them in a local cache for offline use.
+- **Onboarding Readiness Check**: Added a loading state during the final step of setup to ensure the first day's commentary is prefetched before the user enters the main reading screen.
+
+### Changed
+- **Study Panel Streamlining**: Removed the AI commentary fallback from the Study panel in `WordScreen`. The panel now prioritizes bundled or prefetched Matthew Henry commentaries and provides a graceful fallback if none exist, reducing reliance on AI keys for basic study.
+
 ## [2026-04-11]
 
 ### Fixed

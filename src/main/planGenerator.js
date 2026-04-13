@@ -80,6 +80,55 @@ function buildTrack(booksArr, targetDays) {
   return buckets.map(formatBucket);
 }
 
+function buildAlternatingTrack(booksArr, targetDays) {
+  const allBookChapters = booksArr.map(b => {
+    const chapCount = allBooksDict[b] || 0;
+    const chapters = [];
+    for (let c = 1; c <= chapCount; c++) {
+      chapters.push({ book: b, chapter: c });
+    }
+    return chapters;
+  }).filter(c => c.length > 0);
+
+  const generateSequence = () => {
+    const queues = allBookChapters.map(chapters => [...chapters]);
+    let slots = [];
+    if (queues.length > 0) slots.push(queues.shift());
+    if (queues.length > 0) slots.push(queues.shift());
+
+    const seq = [];
+    let turn = 0;
+
+    while (slots.length > 0) {
+      const activeSlotIndex = turn % slots.length;
+      const activeQueue = slots[activeSlotIndex];
+      
+      const chap = activeQueue.shift();
+      seq.push(chap);
+
+      if (activeQueue.length === 0) {
+        if (queues.length > 0) {
+          slots[activeSlotIndex] = queues.shift();
+        } else {
+          slots.splice(activeSlotIndex, 1);
+          continue; 
+        }
+      }
+      turn++;
+    }
+    return seq;
+  };
+
+  let seq = generateSequence();
+  if (seq.length === 0) return Array(targetDays).fill({ reference: "", book: "", startChapter: 1, endChapter: 1 });
+
+  while (seq.length < targetDays) {
+    seq = seq.concat(generateSequence());
+  }
+
+  return seq.slice(0, targetDays).map(c => formatBucket([c]));
+}
+
 function generateDevotePlan() {
   const balancedNtOrder = [
     'Matthew', 'Acts', 'Romans', 'Mark', '1 Corinthians', '2 Corinthians',
@@ -110,7 +159,7 @@ function getReadingForDay(planType, customBooks, dayNum) {
   let plan = [];
 
   if (planType === 'custom' && customBooks && customBooks.length > 0) {
-    let days = buildTrack(customBooks, 365);
+    let days = buildAlternatingTrack(customBooks, 365);
     plan = days.map((d, idx) => ({ day: idx + 1, ...d }));
   } else {
     plan = generateDevotePlan();

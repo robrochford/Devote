@@ -3,7 +3,7 @@ import { autoUpdater } from 'electron-updater'
 import { join } from 'path'
 import { createServer } from 'http'
 import { tmpdir } from 'os'
-import { writeFileSync } from 'fs'
+import { writeFileSync, readFileSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import Store from 'electron-store'
 
@@ -11,7 +11,21 @@ import { getReadingForDay, allBooksDict } from './planGenerator'
 
 const store = new Store()
 
-function getLocalDayStr(d = new Date()) {
+let bundledMHC = {}
+try {
+  const mhcPath = join(__dirname, '../../resources/matthew_henry_concise.json')
+  bundledMHC = JSON.parse(readFileSync(mhcPath, 'utf8'))
+} catch (e) {
+  console.error("Failed to load bundled MHC", e)
+}
+
+function getMhcEntry(key) {
+  if (bundledMHC[key]) return bundledMHC[key];
+  const cache = store.get('mhcCache') || {};
+  return cache[key] || null;
+}
+
+// OS Startup launch settings
   const year = d.getFullYear()
   const month = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
@@ -639,6 +653,88 @@ app.whenReady().then(() => {
     current[key] = text
     store.set('customCommentaries', current)
     return true
+  })
+
+  async function scrapeBibleHub(book, chapter) {
+    const formattedBook = book.toLowerCase().replace(/\s+/g, '_')
+    const url = `https://biblehub.com/commentaries/mhc/${formattedBook}/${chapter}.htm`
+    
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`${res.status}`)
+    
+    const html = await res.text()
+    
+    const matches = [...html.matchAll(/class="comm">([\s\S]*?)<\/div>/ig)]
+    if (!matches || matches.length === 0) throw new Error('Could not find text block')
+    
+    let text = matches.map(m => m[1]).join('\n\n')
+    
+    text = text.replace(/<br\s*\/?>/gi, '\n')
+    text = text.replace(/<p[\s\S]*?>/gi, '\n\n')
+    text = text.replace(/<[^>]*>?/gm, '') // Strip tags
+    text = text.replace(/&#\d+;/g, "'") // Decode simple entities
+    text = text.replace(/&quot;/g, '"')
+    text = text.replace(/\n\s*\n/g, '\n\n') // Collapse newlines
+    
+    return text.trim()
+  }
+
+  ipcMain.handle('prefetch-mhc-commentaries', async (_, { customBooks, startDay = 1 }) => {
+    try {
+      const missing = [];
+      const seen = new Set();
+      
+      for (let day = startDay; day <= 365; day++) {
+        const p = getReadingForDay('custom', customBooks, day);
+        const key = `${p.book} ${p.startChapter}`;
+        if (!getMhcEntry(key) && !seen.has(key)) {
+          missing.push({ key, book: p.book, chapter: p.startChapter });
+          seen.add(key);
+        }
+      }
+
+      if (missing.length === 0) return true;
+
+      // Fetch first immediately
+      const first = missing.shift();
+      try {
+        const text = await scrapeBibleHub(first.book, first.chapter);
+        const cache = store.get('mhcCache') || {};
+        cache[first.key] = text;
+        store.set('mhcCache', cache);
+        console.log(`Prefetched initial MHC for ${first.key}`);
+      } catch (e) {
+        console.error(`Failed Initial MHC fetch for ${first.key}:`, e);
+      }
+
+      // Background remainder
+      if (missing.length > 0) {
+        (async () => {
+          for (const item of missing) {
+            if (getMhcEntry(item.key)) continue;
+            try {
+              const text = await scrapeBibleHub(item.book, item.chapter);
+              const cache = store.get('mhcCache') || {};
+              cache[item.key] = text;
+              store.set('mhcCache', cache);
+              console.log(`Background prefetched MHC for ${item.key}`);
+            } catch (e) {
+              console.error(`Failed Background MHC ${item.key}:`, e);
+            }
+            await new Promise(r => setTimeout(r, 200));
+          }
+        })();
+      }
+
+      return true;
+    } catch (err) {
+      console.error('prefetch error', err);
+      return false;
+    }
+  })
+
+  ipcMain.handle('get-mhc-entry', (_, key) => {
+    return getMhcEntry(key);
   })
 
   // Initial check on startup — short delay to let the window settle first

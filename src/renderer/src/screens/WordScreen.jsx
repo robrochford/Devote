@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Headphones, Book, ChevronRight, Loader2 } from 'lucide-react'
-import matthewHenry from '../../../../resources/matthew_henry_concise.json'
 
 export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
   const [passageHtml, setPassageHtml] = useState('')
@@ -10,7 +9,6 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [showCommentary, setShowCommentary] = useState(false)
   const [commentaryText, setCommentaryText] = useState('')
-  const [generatingCommentary, setGeneratingCommentary] = useState(false)
   const [todayReading, setTodayReading] = useState({ day: '', reference: '' })
   const [retryKey, setRetryKey] = useState(0) // Increment to re-run loadData without a full app reload
   const audioRef = useRef(null)
@@ -62,12 +60,15 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
         const commentaryKey = `${reading.book} ${reading.startChapter}`
         
         if (customStore[commentaryKey]) {
-          // AI-generated or user-edited commentaries take priority over the bundled data
+          // AI-generated or user-edited commentaries take priority
           setCommentaryText(customStore[commentaryKey])
-        } else if (matthewHenry[commentaryKey]) {
-          setCommentaryText(matthewHenry[commentaryKey])
         } else {
-          setCommentaryText('')
+          const mhcText = await window.electron.ipcRenderer.invoke('get-mhc-entry', commentaryKey)
+          if (mhcText) {
+            setCommentaryText(mhcText)
+          } else {
+            setCommentaryText('')
+          }
         }
 
         setLoading(false)
@@ -109,31 +110,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
     setShowCommentary(!showCommentary)
     
     if (!showCommentary && !commentaryText) {
-      if (!aiApiKey) {
-        setCommentaryText("You've reached a passage with no local commentary. Add an AI API key in settings to auto-generate one!")
-        return
-      }
-
-      setGeneratingCommentary(true)
-      try {
-        const commentaryKey = `${todayReading.book} ${todayReading.startChapter}`
-        const prompt = `You are Matthew Henry. Write a concise, 3-paragraph theological and pastoral commentary on ${todayReading.reference}. Do not use flowery modern AI language. Be reverent, puritanical, and deeply thoughtful.`
-        
-        // Fetch new commentary using AI
-        const newText = await window.electron.ipcRenderer.invoke('fetch-ai', {
-          prompt: prompt
-        })
-        
-        setCommentaryText(newText)
-        
-        // Save to local store so we don't have to generate it again!
-        await window.electron.ipcRenderer.invoke('save-custom-commentary', { key: commentaryKey, text: newText })
-        
-      } catch (e) {
-        console.error(e)
-        setCommentaryText("Failed to generate commentary. Please check your AI API key.")
-      }
-      setGeneratingCommentary(false)
+      setCommentaryText("No commentary available for this passage.")
     }
   }
 
@@ -222,14 +199,8 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
       {showCommentary && (
         <div className="w-1/3 bg-zinc-950/50 p-6 overflow-y-auto custom-scrollbar border-l border-zinc-800 animate-slide-in-right flex flex-col">
           <h3 className="text-gold-500 font-serif text-xl mb-4 border-b border-zinc-800 pb-2">Matthew Henry's Commentary</h3>
-          {generatingCommentary ? (
-            <div className="flex flex-col items-center justify-center flex-1 space-y-4">
-              <Loader2 className="animate-spin text-gold-500 mb-2" size={24} />
-              <p className="text-zinc-500 text-sm text-center">Auto-generating pastoral commentary for {todayReading.reference}...</p>
-            </div>
-          ) : (
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-              {(() => {
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {(() => {
                 // If the text naturally has newlines (e.g. from AI), just use those
                 if (commentaryText.includes('\n')) {
                   return commentaryText.split('\n').filter(p => p.trim().length > 0)
@@ -252,7 +223,6 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
                 </p>
               ))}
             </div>
-          )}
         </div>
       )}
 
