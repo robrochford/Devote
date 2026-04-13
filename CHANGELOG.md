@@ -14,6 +14,7 @@ All notable changes to the Devote application will be documented in this file.
 
 ### Fixed
 - **Build Pipe Crash**: Resolved a syntax error in `index.js` where a function signature was inadvertently stripped during a code migration.
+- **MHC Channel Error**: Fixed an "Invalid channel" error by whitelisting the new MHC prefetch and lookup channels in the preload IPC bridge.
 
 ## [2026-04-11]
 

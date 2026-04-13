@@ -39,7 +39,7 @@ if (process.contextIsolated) {
             'fetch-esv', 'fetch-esv-audio', 'fetch-ai',
             'get-custom-commentaries', 'save-custom-commentary',
             'get-today-reading', 'get-all-books', 'get-version',
-            'check-for-updates'
+            'check-for-updates', 'get-mhc-entry', 'prefetch-mhc-commentaries'
           ]
           if (validChannels.includes(channel)) {
             return ipcRenderer.invoke(channel, ...args)
