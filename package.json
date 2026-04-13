@@ -16,7 +16,7 @@
     "build": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:win": "npm run build && electron-builder --win",
-    "release": "npm run build && electron-builder --win -p always"
+    "release": "npm run build && electron-builder -p always"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
