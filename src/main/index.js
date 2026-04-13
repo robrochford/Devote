@@ -25,6 +25,44 @@ function getMhcEntry(key) {
   return cache[key] || null;
 }
 
+// Prune the local MHC cache to only keep entries still needed:
+// - Only chapters from currentPlanDay to 365
+// - Only chapters belonging to the current customBooks selection
+// Called after completing a devotion and after saving settings (plan changes)
+function pruneCache() {
+  const cache = store.get('mhcCache') || {}
+  if (Object.keys(cache).length === 0) return
+
+  const s = store.store
+
+  // If not on a custom plan, there's nothing to keep — wipe it all
+  if (s.planType !== 'custom' || !s.customBooks || s.customBooks.length === 0) {
+    store.set('mhcCache', {})
+    console.log('Pruned entire MHC cache (no custom plan active)')
+    return
+  }
+
+  // Build the set of keys still needed from currentPlanDay onwards
+  const currentDay = s.currentPlanDay || 1
+  const needed = new Set()
+  for (let day = currentDay; day <= 365; day++) {
+    const p = getReadingForDay('custom', s.customBooks, day)
+    const key = `${p.book} ${p.startChapter}`
+    needed.add(key)
+  }
+
+  const pruned = {}
+  for (const [key, val] of Object.entries(cache)) {
+    if (needed.has(key)) pruned[key] = val
+  }
+
+  const removed = Object.keys(cache).length - Object.keys(pruned).length
+  if (removed > 0) {
+    store.set('mhcCache', pruned)
+    console.log(`Pruned ${removed} stale MHC cache entries`)
+  }
+}
+
 function getLocalDayStr(d = new Date()) {
   const year = d.getFullYear()
   const month = String(d.getMonth() + 1).padStart(2, '0')
@@ -462,6 +500,8 @@ app.whenReady().then(() => {
   ipcMain.handle('save-settings', (_, newSettings) => {
     try {
       store.set(newSettings)
+      // Prune stale MHC cache in case the plan or day changed
+      pruneCache()
       return true
     } catch (e) {
       console.error('Failed to save settings:', e)
@@ -478,6 +518,9 @@ app.whenReady().then(() => {
       store.set('lastCompletedDate', todayStr)
       store.set('currentStreak', (settings.currentStreak || 0) + 1)
       store.set('currentPlanDay', nextDay)
+
+      // Remove commentaries for past days now they are no longer needed
+      pruneCache()
 
       // Prefetch tomorrow's reading while internet is active
       prefetchNextReading(nextDay)
