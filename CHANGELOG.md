@@ -15,6 +15,9 @@ All notable changes to the Devote application will be documented in this file.
 ### Fixed
 - **Build Pipe Crash**: Resolved a syntax error in `index.js` where a function signature was inadvertently stripped during a code migration.
 - **MHC Channel Error**: Fixed an "Invalid channel" error by whitelisting the new MHC prefetch and lookup channels in the preload IPC bridge.
+- **Title/Passage Mismatch**: Cached reading validation now checks both `day` and `reference` — prevents a stale cached passage (from the previous plan) being displayed when the plan changes.
+- **Commentary Not Loading**: Added a startup background job that automatically downloads missing Matthew Henry commentaries for all 365 days of a custom plan. This catches users who completed onboarding before the IPC whitelist fix landed.
+- **Commentary Reference Stored**: `prefetchNextReading` now persists the passage `reference` alongside the cached reading so future invalidation checks can be exact.
 
 ## [2026-04-11]
 

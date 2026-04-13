@@ -281,6 +281,42 @@ app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.devote.app')
   evaluateStreak()
 
+  // On startup, if the user has a custom plan, kick off a background MHC download
+  // for any chapters not yet cached. This catches users who set up before the 
+  // preload whitelist fix landed.
+  setTimeout(async () => {
+    const s = store.store
+    if (s.planType === 'custom' && s.customBooks && s.customBooks.length > 0) {
+      const missing = []
+      const seen = new Set()
+      for (let day = 1; day <= 365; day++) {
+        const p = getReadingForDay('custom', s.customBooks, day)
+        const key = `${p.book} ${p.startChapter}`
+        if (!getMhcEntry(key) && !seen.has(key)) {
+          missing.push({ key, book: p.book, chapter: p.startChapter })
+          seen.add(key)
+        }
+      }
+      if (missing.length > 0) {
+        console.log(`Startup MHC background job: ${missing.length} chapters to fetch`)
+        for (const item of missing) {
+          if (getMhcEntry(item.key)) continue
+          try {
+            const text = await scrapeBibleHub(item.book, item.chapter)
+            const cache = store.get('mhcCache') || {}
+            cache[item.key] = text
+            store.set('mhcCache', cache)
+            console.log(`Startup MHC: cached ${item.key}`)
+          } catch (e) {
+            console.error(`Startup MHC: failed ${item.key}:`, e.message)
+          }
+          await new Promise(r => setTimeout(r, 200))
+        }
+        console.log('Startup MHC background job complete')
+      }
+    }
+  }, 5000) // 5s delay — let the window settle before network starts
+
   // Local HTTP proxy server for authenticated ESV audio — guaranteed to work in all contexts
   const audioServer = createServer(async (req, res) => {
     try {
@@ -469,7 +505,7 @@ app.whenReady().then(() => {
       
       if (response.ok) {
         const data = await response.json()
-        store.set('cachedReading', { day: nextDay, data: data })
+        store.set('cachedReading', { day: nextDay, reference: reading.reference, data: data })
         console.log(`Successfully prefetched reading for day ${nextDay}`)
       }
     } catch (e) {

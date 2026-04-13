@@ -32,7 +32,10 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
 
         // ESV specific fetch
         // CHECK CACHE FIRST: If we have today's reading pre-fetched, use it instantly!
-        if (settings.cachedReading && settings.cachedReading.day === reading.day) {
+        // Validate both day AND reference to guard against stale cache after a plan change.
+        if (settings.cachedReading &&
+            settings.cachedReading.day === reading.day &&
+            settings.cachedReading.reference === reading.reference) {
           console.log('Using cached reading for Day', reading.day)
           const data = settings.cachedReading.data
           setPassageHtml(data.passages[0])
