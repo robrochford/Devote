@@ -12,6 +12,9 @@ All notable changes to the Devote application will be documented in this file.
 ### Changed
 - **Study Panel Streamlining**: Removed the AI commentary fallback from the Study panel in `WordScreen`. The panel now prioritizes bundled or prefetched Matthew Henry commentaries and provides a graceful fallback if none exist, reducing reliance on AI keys for basic study.
 
+### Fixed
+- **Build Pipe Crash**: Resolved a syntax error in `index.js` where a function signature was inadvertently stripped during a code migration.
+
 ## [2026-04-11]
 
 ### Fixed
