@@ -210,11 +210,14 @@ function createKioskWindow() {
   const isSetup = store.get('hasCompletedOnboarding') || false
 
   kioskWindow = new BrowserWindow({
-    show: false, 
-    frame: false, 
-    alwaysOnTop: true, 
-    kiosk: true, 
-    transparent: true, 
+    show: false,
+    frame: false,
+    alwaysOnTop: true,
+    // kiosk: true causes issues on macOS — it locks the screen and can't be
+    // minimized or hidden, leaving a black screen after Skip Today / Snooze.
+    // fullscreen achieves the same immersive feel without those restrictions.
+    fullscreen: !is.dev,
+    transparent: true,
     backgroundColor: '#00000000',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -248,10 +251,17 @@ function createKioskWindow() {
         'document.querySelectorAll("audio").forEach(a => a.pause())'
       ).catch(() => {})
 
-      // Auto-minimize perfectly out of the way if they click another app during setup
+      // During onboarding, allow user to minimise so they can access another
+      // app (e.g. to retrieve their API key). On Mac, hide() is more reliable
+      // than minimize() in fullscreen mode.
       const isSetup = store.get('hasCompletedOnboarding') || false
       if (!isSetup) {
-         kioskWindow.minimize()
+        if (process.platform === 'darwin') {
+          kioskWindow.setFullScreen(false)
+          kioskWindow.minimize()
+        } else {
+          kioskWindow.minimize()
+        }
       }
     }
   })
@@ -259,6 +269,7 @@ function createKioskWindow() {
   kioskWindow.on('restore', () => {
     if (kioskWindow && !kioskWindow.isDestroyed()) {
       kioskWindow.setAlwaysOnTop(true)
+      if (!is.dev) kioskWindow.setFullScreen(true)
       kioskWindow.show()
       kioskWindow.focus()
       
@@ -480,6 +491,34 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('get-version', () => app.getVersion())
+
+  const hideKiosk = () => {
+    if (!kioskWindow || kioskWindow.isDestroyed()) return
+    // On Mac, must exit fullscreen before hiding — otherwise a black frame
+    // is left behind with no way to dismiss it.
+    if (process.platform === 'darwin' && kioskWindow.isFullScreen()) {
+      kioskWindow.setFullScreen(false)
+      // Small delay to let macOS complete the fullscreen exit animation
+      setTimeout(() => kioskWindow.hide(), 300)
+    } else {
+      kioskWindow.hide()
+    }
+  }
+
+  ipcMain.on('close-kiosk', () => hideKiosk())
+
+  ipcMain.on('snooze', () => {
+    const now = new Date()
+    now.setHours(now.getHours() + 1)
+    store.set('snoozeUntil', now.toISOString())
+    hideKiosk()
+  })
+
+  ipcMain.on('skip-today', () => {
+    store.set('lastCompletedDate', getLocalDayStr())
+    store.set('snoozeUntil', null)
+    hideKiosk()
+  })
 
   // IPC Handlers
   ipcMain.handle('get-settings', () => {
