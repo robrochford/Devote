@@ -15,6 +15,10 @@ export default function WelcomeScreen({ onComplete }) {
       window.electron.ipcRenderer.invoke('get-all-books').then(books => {
         setAllBooks(books)
       })
+      // Pre-populate any existing API key so it isn't wiped on plan reset
+      window.electron.ipcRenderer.invoke('get-settings').then(s => {
+        if (s.aiApiKey) setAiApiKey(s.aiApiKey)
+      })
     }
   }, [])
 
