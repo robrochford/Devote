@@ -19,6 +19,8 @@ All notable changes to the Devote application will be documented in this file.
 - **Title/Passage Mismatch**: Cached reading validation now checks both `day` and `reference` — prevents a stale cached passage (from the previous plan) being displayed when the plan changes.
 - **Commentary Not Loading**: Added a startup background job that automatically downloads missing Matthew Henry commentaries for all 365 days of a custom plan. This catches users who completed onboarding before the IPC whitelist fix landed.
 - **Commentary Reference Stored**: `prefetchNextReading` now persists the passage `reference` alongside the cached reading so future invalidation checks can be exact.
+- **Plan Reset Prefetching**: `PlanCompleteScreen` now correctly fetches the opening commentaries and displays a "Preparing..." state when setting up a new custom plan, matching `WelcomeScreen` behavior.
+- **Alternating Track Reliability**: `buildAlternatingTrack` now uses a simplified round-robin generation strategy, fixing a race condition that could cause sequences to drop books early or select out of turn when reading from more than two custom books.
 
 ## [2026-04-11]
 

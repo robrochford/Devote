@@ -81,47 +81,43 @@ function buildTrack(booksArr, targetDays) {
 }
 
 function buildAlternatingTrack(booksArr, targetDays) {
-  const allBookChapters = booksArr.map(b => {
-    const chapCount = allBooksDict[b] || 0;
-    const chapters = [];
-    for (let c = 1; c <= chapCount; c++) {
-      chapters.push({ book: b, chapter: c });
-    }
-    return chapters;
-  }).filter(c => c.length > 0);
+  const allBookChapters = booksArr
+    .map(b => {
+      const chapCount = allBooksDict[b] || 0;
+      const chapters = [];
+      for (let c = 1; c <= chapCount; c++) {
+        chapters.push({ book: b, chapter: c });
+      }
+      return chapters;
+    })
+    .filter(c => c.length > 0);
 
+  if (allBookChapters.length === 0) {
+    return Array(targetDays).fill({ reference: '', book: '', startChapter: 1, endChapter: 1 });
+  }
+
+  // Round-robin rotation: pull from the front queue, then rotate it to the back.
+  // When a book is exhausted, remove it from the rotation.
+  // This guarantees correct alternation with any number of books and avoids
+  // the turn-counter/splice race condition in the previous implementation.
   const generateSequence = () => {
     const queues = allBookChapters.map(chapters => [...chapters]);
-    let slots = [];
-    if (queues.length > 0) slots.push(queues.shift());
-    if (queues.length > 0) slots.push(queues.shift());
-
     const seq = [];
-    let turn = 0;
 
-    while (slots.length > 0) {
-      const activeSlotIndex = turn % slots.length;
-      const activeQueue = slots[activeSlotIndex];
-      
-      const chap = activeQueue.shift();
+    while (queues.length > 0) {
+      const chap = queues[0].shift();
       seq.push(chap);
 
-      if (activeQueue.length === 0) {
-        if (queues.length > 0) {
-          slots[activeSlotIndex] = queues.shift();
-        } else {
-          slots.splice(activeSlotIndex, 1);
-          continue; 
-        }
+      if (queues[0].length === 0) {
+        queues.shift(); // Book exhausted — remove from rotation
+      } else {
+        queues.push(queues.shift()); // Rotate to back so the next book gets its turn
       }
-      turn++;
     }
     return seq;
   };
 
   let seq = generateSequence();
-  if (seq.length === 0) return Array(targetDays).fill({ reference: "", book: "", startChapter: 1, endChapter: 1 });
-
   while (seq.length < targetDays) {
     seq = seq.concat(generateSequence());
   }
