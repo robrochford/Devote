@@ -30,8 +30,14 @@ export default function App() {
           s.aiApiKey = s.geminiApiKey
         }
 
+        // Migration cleanup: If they were accidentally marked as onboarded by the 
+        // lastOpenedDate bug but haven't finished a devotion, reset them.
+        if (s.hasCompletedOnboarding && s.lastCompletedDate === null && !s.planType) {
+           s.hasCompletedOnboarding = false;
+        }
+
         // Silent migration for users before v1.1
-        if (!s.hasCompletedOnboarding && (s.lastCompletedDate !== null || s.lastOpenedDate)) {
+        if (!s.hasCompletedOnboarding && s.lastCompletedDate !== null) {
            s.hasCompletedOnboarding = true;
            window.electron.ipcRenderer.invoke('save-settings', { hasCompletedOnboarding: true })
         }

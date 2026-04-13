@@ -23,6 +23,10 @@ All notable changes to the Devote application will be documented in this file.
 - **Alternating Track Reliability**: `buildAlternatingTrack` now uses a strict two-slot rolling queue strategy. This guarantees only two books are alternated at any given time, regardless of how many custom books are selected, and fixes a race condition where sequences could drop books early.
 - **AI Key State Desync**: Fixed an issue where the Reflection Screen would crash with "No AI API Key found" if a user typed an API Key into the settings modal but had not yet clicked "Save & Close". The renderer now explicitly passes the live key to the main process for the fetch request.
 - **Anthropic 404 Error Fallback**: Added a model fallback loop for Anthropic API keys. If a user's API tier does not yet support `claude-3-5-haiku-20241022` (returning a 404), the engine will automatically downgrade to `claude-3-haiku-20240307` to ensure reflections continue to generate without error.
+- **Onboarding Skip Bug**: Fixed a logic error where any user opening the app for the second time would have their onboarding silently skipped due to an aggressive "migration" check. New users are now correctly sent through the full setup process.
+- **Mac Kiosk Loop**: Removed `kiosk: true` on macOS, which was causing the app to lock the screen and fail to minimize or hide. Replaced with standard Fullscreen mode for stability.
+- **Unintended Minimization**: Removed automatic 'minimize on blur' during onboarding, which was causing the app to disappear unexpectedly during screen transitions. Added a manual minimize button to the setup screens instead.
+- **Missing Skip/Snooze Handlers**: Added missing IPC handlers for 'Skip Today' and 'Snooze' which were causing the app to fail to dismiss on macOS, leaving a black screen behind.
 
 ## [2026-04-11]
 

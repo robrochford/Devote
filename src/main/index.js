@@ -250,19 +250,6 @@ function createKioskWindow() {
       kioskWindow.webContents.executeJavaScript(
         'document.querySelectorAll("audio").forEach(a => a.pause())'
       ).catch(() => {})
-
-      // During onboarding, allow user to minimise so they can access another
-      // app (e.g. to retrieve their API key). On Mac, hide() is more reliable
-      // than minimize() in fullscreen mode.
-      const isSetup = store.get('hasCompletedOnboarding') || false
-      if (!isSetup) {
-        if (process.platform === 'darwin') {
-          kioskWindow.setFullScreen(false)
-          kioskWindow.minimize()
-        } else {
-          kioskWindow.minimize()
-        }
-      }
     }
   })
 
