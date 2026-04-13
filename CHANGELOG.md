@@ -20,7 +20,7 @@ All notable changes to the Devote application will be documented in this file.
 - **Commentary Not Loading**: Added a startup background job that automatically downloads missing Matthew Henry commentaries for all 365 days of a custom plan. This catches users who completed onboarding before the IPC whitelist fix landed.
 - **Commentary Reference Stored**: `prefetchNextReading` now persists the passage `reference` alongside the cached reading so future invalidation checks can be exact.
 - **Plan Reset Prefetching**: `PlanCompleteScreen` now correctly fetches the opening commentaries and displays a "Preparing..." state when setting up a new custom plan, matching `WelcomeScreen` behavior.
-- **Alternating Track Reliability**: `buildAlternatingTrack` now uses a simplified round-robin generation strategy, fixing a race condition that could cause sequences to drop books early or select out of turn when reading from more than two custom books.
+- **Alternating Track Reliability**: `buildAlternatingTrack` now uses a strict two-slot rolling queue strategy. This guarantees only two books are alternated at any given time, regardless of how many custom books are selected, and fixes a race condition where sequences could drop books early.
 
 ## [2026-04-11]
 

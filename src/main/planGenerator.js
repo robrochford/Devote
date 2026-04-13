@@ -96,23 +96,31 @@ function buildAlternatingTrack(booksArr, targetDays) {
     return Array(targetDays).fill({ reference: '', book: '', startChapter: 1, endChapter: 1 });
   }
 
-  // Round-robin rotation: pull from the front queue, then rotate it to the back.
-  // When a book is exhausted, remove it from the rotation.
-  // This guarantees correct alternation with any number of books and avoids
-  // the turn-counter/splice race condition in the previous implementation.
+  // Two-slot alternation: keep exactly two books active at any time.
+  // When one book finishes, pull the next book from the queue into that slot.
   const generateSequence = () => {
     const queues = allBookChapters.map(chapters => [...chapters]);
-    const seq = [];
+    const slots = [];
+    if (queues.length > 0) slots.push(queues.shift());
+    if (queues.length > 0) slots.push(queues.shift());
 
-    while (queues.length > 0) {
-      const chap = queues[0].shift();
+    const seq = [];
+    let turn = 0;
+
+    while (slots.length > 0) {
+      const activeIndex = turn % slots.length;
+      const chap = slots[activeIndex].shift();
       seq.push(chap);
 
-      if (queues[0].length === 0) {
-        queues.shift(); // Book exhausted — remove from rotation
-      } else {
-        queues.push(queues.shift()); // Rotate to back so the next book gets its turn
+      if (slots[activeIndex].length === 0) {
+        if (queues.length > 0) {
+          slots[activeIndex] = queues.shift(); // Replace empty slot with next book
+        } else {
+          slots.splice(activeIndex, 1); // No more books, remove the slot
+          continue; // Skip incrementing turn so the remaining slot gets hit next
+        }
       }
+      turn++;
     }
     return seq;
   };
