@@ -13,6 +13,9 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest]
 
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
@@ -20,7 +23,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           architecture: x64
 
       - name: Install dependencies
