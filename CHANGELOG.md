@@ -2,6 +2,13 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-04-14]
+
+### Fixed
+- **Redundant Network Fetch**: Fixed a `TypeError: fetch failed` crash in the Reflection Screen by eliminating a redundant ESV API call. The screen now uses the passage content already fetched by the previous screen, improving offline reliability and speed.
+- **Mac Build Pipe Cleanup**: Resolved a CI build failure by removing an invalid reference to a non-existent `icon.icns` file and disabling the `hardenedRuntime` setting which requires specialized Apple signing certificates.
+- **Accidental Key Deletion**: Fixed a state-handling bug in the Welcome layout where the user's AI API key could be overwritten with a blank value if they changed their reading plan without re-entering the key.
+
 ## [2026-04-13]
 
 ### Added
