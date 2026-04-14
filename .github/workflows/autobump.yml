@@ -7,6 +7,8 @@ on:
     paths-ignore:
       - 'package.json'
       - '.github/workflows/**'
+      - 'CHANGELOG.md'
+      - 'README.md'
 
 jobs:
   bump-version:
