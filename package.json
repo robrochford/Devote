@@ -17,7 +17,8 @@
     "postinstall": "electron-builder install-app-deps",
     "build:win": "npm run build && electron-builder --win",
     "release:win": "npm run build && electron-builder --win -p always",
-    "release:mac": "npm run build && electron-builder --mac -p always"
+    "release:mac": "npm run build && electron-builder --mac -p always",
+    "snapshot": "node scripts/snapshot.mjs"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
@@ -34,6 +35,7 @@
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^2.1.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "archiver": "^7.0.1",
     "cross-env": "^10.1.0",
     "electron": "^33.2.1",
     "electron-builder": "^25.1.8",

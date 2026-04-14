@@ -9,6 +9,7 @@ background-command-*.txt
 *.blockmap
 
 # Documentation & Private Notes (Local Only)
+.snapshots/
 KNOWLEDGE_BASE.md
 
 # mobile_plans/ is still ignored as it contains draft strategy.
