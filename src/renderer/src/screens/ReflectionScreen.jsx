@@ -17,13 +17,20 @@ export default function ReflectionScreen({ isActive, apiKey, passageText, onNext
       return
     }
 
+    // Only start generation when the user actually lands on the screen,
+    // so we have the full passageText from the previous step.
+    if (!isActive) return
+
     async function generateQuestions() {
       setLoading(true)
       try {
         const todayReading = await window.electron.ipcRenderer.invoke('get-today-reading')
 
         // Guard: only generate once per day, even across tray sleep cycles
-        if (fetchedForDay.current === todayReading.day) return
+        if (fetchedForDay.current === todayReading.day) {
+          setLoading(false)
+          return
+        }
 
         // Use passage text passed from WordScreen — no second network call needed
         const text = passageText || todayReading.reference
@@ -46,13 +53,17 @@ export default function ReflectionScreen({ isActive, apiKey, passageText, onNext
         
       } catch (err) {
         console.error(err)
-        setError(`Error: ${err.message || 'Unknown error occurred'}`)
+        let msg = err.message || 'Unknown error occurred'
+        if (msg.includes('Error invoking remote method')) {
+          msg = msg.split(':').slice(2).join(':').trim() // Strip "Error invoking remote method '...':"
+        }
+        setError(msg)
       }
       setLoading(false)
     }
 
     generateQuestions()
-  }, [apiKey, passageText])
+  }, [apiKey, passageText, isActive])
 
   return (
     <div className="flex-1 flex flex-col items-center p-12 animate-slide-in-right relative h-full overflow-hidden">
