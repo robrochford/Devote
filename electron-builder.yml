@@ -2,6 +2,7 @@ appId: com.devote.app
 productName: Devote
 directories:
   buildResources: build
+icon: build/icon.png
 files:
   - '!**/.vscode/*'
   - '!src/*'
