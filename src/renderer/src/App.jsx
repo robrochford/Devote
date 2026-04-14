@@ -19,6 +19,7 @@ export default function App() {
   const [updateReady, setUpdateReady] = useState(false)
   const [updateVersion, setUpdateVersion] = useState('')
   const [checkingUpdate, setCheckingUpdate] = useState(false)
+  const [passageText, setPassageText] = useState('')
 
   useEffect(() => {
     // Load initial settings
@@ -106,6 +107,7 @@ export default function App() {
 
   const handleNext = (screen) => {
     if (screen === 'complete') setJustFinished(true)
+    if (screen !== 'word') setPassageText('') // Clear between days
     setCurrentScreen(screen)
   }
 
@@ -304,6 +306,7 @@ export default function App() {
                   settings={settings}
                   apiKey={settings.esvApiKey} 
                   aiApiKey={settings.aiApiKey}
+                  onPassageLoaded={(text) => setPassageText(text)}
                   onNext={() => handleNext('reflection')} 
                 />
               )}
@@ -314,6 +317,7 @@ export default function App() {
                   isActive={currentScreen === 'reflection'} 
                   apiKey={settings.aiApiKey} 
                   esvApiKey={settings.esvApiKey}
+                  passageText={passageText}
                   onNext={() => handleNext('complete')} 
                   onBack={() => handleNext('word')}
                />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Sparkles, Loader2, Check, ArrowLeft } from 'lucide-react'
 
-export default function ReflectionScreen({ isActive, apiKey, esvApiKey, onNext, onBack }) {
+export default function ReflectionScreen({ isActive, apiKey, passageText, onNext, onBack }) {
   const [questions, setQuestions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -11,8 +11,8 @@ export default function ReflectionScreen({ isActive, apiKey, esvApiKey, onNext, 
   const fetchedForDay = useRef(null)
 
   useEffect(() => {
-    // If no keys, bail — the JSX will show a friendly "add your key" message
-    if (!apiKey || !esvApiKey) {
+    // If no AI key, bail — the JSX will show a friendly "add your key" message
+    if (!apiKey) {
       setLoading(false)
       return
     }
@@ -25,12 +25,8 @@ export default function ReflectionScreen({ isActive, apiKey, esvApiKey, onNext, 
         // Guard: only generate once per day, even across tray sleep cycles
         if (fetchedForDay.current === todayReading.day) return
 
-        // Fetch passage text first (simplified for prompt)
-        const passageTextData = await window.electron.ipcRenderer.invoke('fetch-esv', {
-          url: `https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(todayReading.reference)}&include-passage-references=false&include-footnotes=false&include-headings=false`,
-          apiKey: esvApiKey
-        })
-        const text = passageTextData.passages[0]
+        // Use passage text passed from WordScreen — no second network call needed
+        const text = passageText || todayReading.reference
 
         const prompt = `You are a thoughtful pastoral assistant. Read the following passage: ${text}. Generate exactly two deep, thought-provoking reflection questions focusing on personal application, spiritual growth, and deep contemplation based on this text. Do not include introductory text, just provide the two questions formatted clearly.`
 
@@ -56,7 +52,7 @@ export default function ReflectionScreen({ isActive, apiKey, esvApiKey, onNext, 
     }
 
     generateQuestions()
-  }, [apiKey])
+  }, [apiKey, passageText])
 
   return (
     <div className="flex-1 flex flex-col items-center p-12 animate-slide-in-right relative h-full overflow-hidden">

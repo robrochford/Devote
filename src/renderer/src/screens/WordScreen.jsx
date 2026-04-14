@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Headphones, Book, ChevronRight, Loader2 } from 'lucide-react'
 
-export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
+export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassageLoaded }) {
   const [passageHtml, setPassageHtml] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -38,7 +38,10 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
             settings.cachedReading.reference === reading.reference) {
           console.log('Using cached reading for Day', reading.day)
           const data = settings.cachedReading.data
-          setPassageHtml(data.passages[0])
+          const html = data.passages[0]
+          setPassageHtml(html)
+          // Strip HTML so ReflectionScreen has clean text for AI prompt
+          if (onPassageLoaded) onPassageLoaded(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
           const q2 = encodeURIComponent(reading.reference)
           setAudioUrl(`http://127.0.0.1:45678/?q=${q2}`)
         } else {
@@ -50,7 +53,10 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext }) {
           })
           
           if (data && data.passages && data.passages.length > 0) {
-            setPassageHtml(data.passages[0])
+            const html = data.passages[0]
+            setPassageHtml(html)
+            // Strip HTML so ReflectionScreen has clean text for AI prompt
+            if (onPassageLoaded) onPassageLoaded(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
             const q2 = encodeURIComponent(reading.reference)
             setAudioUrl(`http://127.0.0.1:45678/?q=${q2}`)
           } else {
