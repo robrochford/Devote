@@ -14,8 +14,6 @@ mac:
   category: public.app-category.lifestyle
   target:
     - dmg
-  icon: build/icon.icns
-  hardenedRuntime: true
   gatekeeperAssess: false
 dmg:
   artifactName: ${name}-${version}.${ext}
