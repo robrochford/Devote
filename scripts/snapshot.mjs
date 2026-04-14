@@ -33,6 +33,29 @@ output.on('close', function() {
   console.log(`\n✅ Snapshot created successfully!`)
   console.log(`📁 File: .snapshots/${outputFileName}`)
   console.log(`📊 Size: ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`)
+
+  // Rotation logic: Limit to 20 snapshots
+  try {
+    const files = fs.readdirSync(SNAPSHOTS_DIR)
+      .filter(f => f.endsWith('.zip'))
+      .map(f => ({
+        name: f,
+        path: path.join(SNAPSHOTS_DIR, f),
+        time: fs.statSync(path.join(SNAPSHOTS_DIR, f)).mtime.getTime()
+      }))
+      .sort((a, b) => a.time - b.time)
+
+    if (files.length > 20) {
+      const toDeleteCount = files.length - 20
+      console.log(`\n🧹 Rotation Policy: Keeping latest 20 snapshots.`)
+      for (let i = 0; i < toDeleteCount; i++) {
+        fs.unlinkSync(files[i].path)
+        console.log(`🗑️ Removed oldest snapshot: ${files[i].name}`)
+      }
+    }
+  } catch (err) {
+    console.error('Snapshot rotation failed:', err)
+  }
 })
 
 archive.on('error', function(err) {

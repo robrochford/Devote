@@ -10,7 +10,8 @@ background-command-*.txt
 
 # Documentation & Private Notes (Local Only)
 .snapshots/
-KNOWLEDGE_BASE.md
+KNOWLEDGEBASE.md
+PROCESS.md
 
 # mobile_plans/ is still ignored as it contains draft strategy.
 mobile_plans/
