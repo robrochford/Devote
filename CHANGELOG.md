@@ -2,6 +2,18 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-04-21]
+
+### Added
+- **Dynamic AI Model Discovery**: Implemented an automated discovery system that hits provider endpoints (`/v1/models`) to find the latest "Haiku," "Flash," or "Mini" strings. This allows the app to automatically adapt to new model releases (like the transition to Claude 4.5) without requiring a software update. Results are cached for 24 hours.
+- **Startup Protection Toggle**: Added a "Launch Devote automatically on computer startup" toggle in the Settings panel. This uses the native Windows startup registry and provides users with clear visibility and control over the background service.
+- **Quit Confirmation Dialog**: Implemented a warning dialog when choosing "Quit Devote" from the system tray. This clarifies that the app will stop checking for devotions until the computer is restarted or the app is launched manually, addressing user confusion over missing daily launches.
+- **Claude 4.5 Haiku Support**: Initialized the dynamic Discovery engine with Claude 4.5 Haiku as the primary target for Anthropic keys.
+
+### Fixed
+- **Discontinued Model (Anthropic Haiku 3.5)**: Resolved an issue where users received "Check your API Tier" errors due to Anthropic deprecating specific Haiku 3.5 strings. The engine now detects 404/Not Found errors, wipes its model cache, and automatically performs a fresh discovery to find the current valid version.
+- **Startup Logic**: Standardized `setLoginItemSettings` to respect the user's new store-based preference for auto-launch.
+
 ## [2026-04-14]
 
 ### Fixed

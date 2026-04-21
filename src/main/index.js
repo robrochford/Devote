@@ -95,9 +95,10 @@ protocol.registerSchemesAsPrivileged([{
   privileges: { secure: true, supportFetchAPI: true, stream: true, bypassCSP: true }
 }])
 
-// OS Startup launch settings
+// OS Startup launch settings — initialized based on store preference
+const isStartupEnabled = store.get('launchAtStartup') !== false // default to true
 app.setLoginItemSettings({
-  openAtLogin: true,
+  openAtLogin: isStartupEnabled,
   path: app.getPath('exe')
 })
 
@@ -460,11 +461,23 @@ app.whenReady().then(() => {
         }
     }},
     { type: 'separator' },
-    { label: 'Quit Devote', click: () => {
-        if (kioskWindow && !kioskWindow.isDestroyed()) {
-           kioskWindow.destroy()
+    { label: 'Quit Devote', click: async () => {
+        const { response } = await dialog.showMessageBox({
+          type: 'warning',
+          title: 'Quit Devote',
+          message: 'Are you sure you want to quit Devote?',
+          detail: 'If you quit now, the app will not run until you start it manually or restart your computer.',
+          buttons: ['Quit', 'Cancel'],
+          defaultId: 1,
+          cancelId: 1,
+          noLink: true
+        })
+        if (response === 0) {
+          if (kioskWindow && !kioskWindow.isDestroyed()) {
+             kioskWindow.destroy()
+          }
+          app.quit()
         }
-        app.quit()
     }}
   ])
   tray.setToolTip('Devote')
@@ -649,6 +662,103 @@ app.whenReady().then(() => {
     }
   })
 
+  // ---------------------------------------------------------------------------
+  // Dynamic Model Discovery
+  // Hits each provider's models endpoint once per 24 hours and caches the
+  // result in electron-store.  Falls back to a hardcoded list if the endpoint
+  // is unreachable so the app never hard-fails due to a network blip.
+  // ---------------------------------------------------------------------------
+  const MODEL_CACHE_TTL_MS = 24 * 60 * 60 * 1000 // 24 hours
+
+  async function resolveAnthropicModels(apiKey) {
+    const cacheKey = 'modelCache_anthropic'
+    const cached = store.get(cacheKey)
+    if (cached && (Date.now() - cached.fetchedAt) < MODEL_CACHE_TTL_MS) {
+      console.log('Anthropic models (cached):', cached.models)
+      return cached.models
+    }
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/models', {
+        headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        // data.data is the array per Anthropic's envelope schema
+        const haiku = (data.data || data.models || [])
+          .map(m => m.id)
+          .filter(id => id.toLowerCase().includes('haiku'))
+          .sort((a, b) => b.localeCompare(a)) // lexicographic desc → newest date suffix first
+        if (haiku.length > 0) {
+          store.set(cacheKey, { models: haiku, fetchedAt: Date.now() })
+          console.log('Anthropic models (discovered):', haiku)
+          return haiku
+        }
+      }
+    } catch (e) {
+      console.warn('Anthropic model discovery failed, using fallback:', e.message)
+    }
+    return ['claude-haiku-4-5-20251001', 'claude-3-5-haiku-20241022', 'claude-3-haiku-20240307']
+  }
+
+  async function resolveGeminiModels(apiKey) {
+    const cacheKey = 'modelCache_gemini'
+    const cached = store.get(cacheKey)
+    if (cached && (Date.now() - cached.fetchedAt) < MODEL_CACHE_TTL_MS) {
+      console.log('Gemini models (cached):', cached.models)
+      return cached.models
+    }
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
+      if (res.ok) {
+        const data = await res.json()
+        const flash = (data.models || [])
+          .filter(m =>
+            m.name.toLowerCase().includes('flash') &&
+            (m.supportedGenerationMethods || []).includes('generateContent')
+          )
+          .map(m => m.name.replace('models/', ''))
+          .sort((a, b) => b.localeCompare(a))
+        if (flash.length > 0) {
+          store.set(cacheKey, { models: flash, fetchedAt: Date.now() })
+          console.log('Gemini models (discovered):', flash)
+          return flash
+        }
+      }
+    } catch (e) {
+      console.warn('Gemini model discovery failed, using fallback:', e.message)
+    }
+    return ['gemini-2.5-flash', 'gemini-2.0-flash']
+  }
+
+  async function resolveOpenAIModels(apiKey) {
+    const cacheKey = 'modelCache_openai'
+    const cached = store.get(cacheKey)
+    if (cached && (Date.now() - cached.fetchedAt) < MODEL_CACHE_TTL_MS) {
+      console.log('OpenAI models (cached):', cached.models)
+      return cached.models
+    }
+    try {
+      const res = await fetch('https://api.openai.com/v1/models', {
+        headers: { 'Authorization': `Bearer ${apiKey}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        // Prefer cheapest/fastest mini models; filter against the live list
+        const preferred = ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4-turbo']
+        const available = new Set((data.data || []).map(m => m.id))
+        const matches = preferred.filter(id => available.has(id))
+        if (matches.length > 0) {
+          store.set(cacheKey, { models: matches, fetchedAt: Date.now() })
+          console.log('OpenAI models (discovered):', matches)
+          return matches
+        }
+      }
+    } catch (e) {
+      console.warn('OpenAI model discovery failed, using fallback:', e.message)
+    }
+    return ['gpt-4o-mini']
+  }
+
   ipcMain.handle('fetch-ai', async (_, { prompt, apiKey }) => {
     try {
       let rawKey = apiKey || store.get('aiApiKey')
@@ -658,10 +768,8 @@ app.whenReady().then(() => {
 
       // 1. Identify Provider and Fetch
       if (keyToUse.startsWith('sk-ant')) {
-        const anthropicModels = [
-          'claude-3-5-haiku-20241022',
-          'claude-3-haiku-20240307'
-        ]
+        // Resolve model list dynamically (cached 24h; falls back to hardcoded list)
+        const anthropicModels = await resolveAnthropicModels(keyToUse)
         const anthropicHeaders = {
           'Content-Type': 'application/json',
           'x-api-key': keyToUse,
@@ -688,6 +796,8 @@ app.whenReady().then(() => {
 
           const status = response.status
           if (status === 404 || status === 503 || status === 429) {
+            // Clear cached model list so next call re-discovers (model may be gone)
+            if (status === 404) store.delete('modelCache_anthropic')
             console.log(`Anthropic ${model} returned ${status}, trying next...`)
             continue
           }
@@ -695,38 +805,44 @@ app.whenReady().then(() => {
           const errorText = await response.text()
           throw new Error(`AI Provider Error (${status}): ${errorText}`)
         }
-        throw new Error('All Anthropic Haiku models are currently unavailable. Check your API tier.')
+        throw new Error('All discovered Anthropic models are currently unavailable. Please try again later.')
 
       } else if (keyToUse.startsWith('sk-')) {
-        console.log(`Trying OpenAI model: gpt-4o-mini`)
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${keyToUse}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [{ role: 'user', content: prompt }]
+        const openAIModels = await resolveOpenAIModels(keyToUse)
+        for (const model of openAIModels) {
+          console.log(`Trying OpenAI model: ${model}`)
+          const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${keyToUse}`
+            },
+            body: JSON.stringify({
+              model: model,
+              messages: [{ role: 'user', content: prompt }]
+            })
           })
-        })
 
-        if (response.ok) {
-          const data = await response.json()
-          return data.choices[0].message.content
+          if (response.ok) {
+            const data = await response.json()
+            return data.choices[0].message.content
+          }
+
+          const status = response.status
+          if (status === 404 || status === 429 || status === 503) {
+            if (status === 404) store.delete('modelCache_openai')
+            console.log(`OpenAI ${model} returned ${status}, trying next...`)
+            continue
+          }
+
+          const errorText = await response.text()
+          throw new Error(`AI Provider Error (${response.status}): ${errorText}`)
         }
-        
-        const errorText = await response.text()
-        throw new Error(`AI Provider Error (${response.status}): ${errorText}`)
+        throw new Error('All discovered OpenAI models are currently unavailable. Please try again later.')
 
       } else {
-        // Google Gemini — try a chain of models, falling back on 503/429
-        const geminiModels = [
-          'gemini-3-flash-preview',
-          'gemini-3.1-flash-lite-preview',
-          'gemini-2.5-flash',
-          'gemini-2.0-flash',
-        ]
+        // Google Gemini — resolve model list dynamically (cached 24h)
+        const geminiModels = await resolveGeminiModels(keyToUse)
 
         for (const model of geminiModels) {
           console.log(`Trying Gemini model: ${model}`)
@@ -745,6 +861,7 @@ app.whenReady().then(() => {
 
           const status = response.status
           if (status === 503 || status === 429 || status === 404) {
+            if (status === 404) store.delete('modelCache_gemini')
             console.log(`Gemini ${model} returned ${status}, trying next...`)
             continue
           }
@@ -753,7 +870,7 @@ app.whenReady().then(() => {
           throw new Error(`AI Provider Error (${status}): ${errorText}`)
         }
 
-        throw new Error('All Gemini models are currently unavailable. Please try again later.')
+        throw new Error('All discovered Gemini models are currently unavailable. Please try again later.')
       }
     } catch (e) {
       console.error(e)
@@ -857,6 +974,19 @@ app.whenReady().then(() => {
 
   ipcMain.handle('get-mhc-entry', (_, key) => {
     return getMhcEntry(key);
+  })
+
+  ipcMain.handle('get-startup-status', () => {
+    return app.getLoginItemSettings().openAtLogin
+  })
+
+  ipcMain.handle('set-startup-status', (_, enabled) => {
+    store.set('launchAtStartup', enabled)
+    app.setLoginItemSettings({
+      openAtLogin: enabled,
+      path: app.getPath('exe')
+    })
+    return true
   })
 
   // Initial check on startup — short delay to let the window settle first

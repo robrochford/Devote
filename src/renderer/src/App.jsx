@@ -100,7 +100,7 @@ export default function App() {
   const getProvider = (key) => {
     if (!key) return 'Any AI Key (Gemini, OpenAI, Claude)'
     const cleanKey = key.trim()
-    if (cleanKey.startsWith('sk-ant')) return 'Detected: Anthropic (Claude 3.5 Haiku)'
+    if (cleanKey.startsWith('sk-ant')) return 'Detected: Anthropic (Claude 4.5 Haiku)'
     if (cleanKey.startsWith('sk-')) return 'Detected: OpenAI (GPT-4o mini)'
     return 'Detected: Google (Gemini 3 Flash)'
   }
@@ -242,6 +242,25 @@ export default function App() {
                 >
                   Skip Today
                 </button>
+              </div>
+
+              <div className="pt-2 flex items-center gap-3">
+                <input 
+                  type="checkbox"
+                  id="startup-toggle"
+                  className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-gold-500 focus:ring-gold-500 focus:ring-offset-zinc-900"
+                  checked={settings.launchAtStartup !== false}
+                  onChange={(e) => {
+                    const enabled = e.target.checked
+                    setSettings({...settings, launchAtStartup: enabled})
+                    if (window.electron) {
+                      window.electron.ipcRenderer.invoke('set-startup-status', enabled)
+                    }
+                  }}
+                />
+                <label htmlFor="startup-toggle" className="text-xs text-zinc-400 cursor-pointer select-none">
+                  Launch Devote automatically on computer startup
+                </label>
               </div>
 
               <div className="pt-2 flex gap-4">
