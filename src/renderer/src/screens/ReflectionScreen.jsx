@@ -17,9 +17,9 @@ export default function ReflectionScreen({ isActive, apiKey, passageText, onNext
       return
     }
 
-    // Only start generation when the user actually lands on the screen,
-    // so we have the full passageText from the previous step.
-    if (!isActive) return
+    // Start generation as soon as we have passage text, even if not active yet.
+    // This preloads the questions in the background while the user is reading.
+    if (!passageText) return
 
     async function generateQuestions() {
       setLoading(true)
@@ -35,17 +35,32 @@ export default function ReflectionScreen({ isActive, apiKey, passageText, onNext
         // Use passage text passed from WordScreen — no second network call needed
         const text = passageText || todayReading.reference
 
-        const prompt = `You are a thoughtful pastoral assistant. Read the following passage: ${text}. Generate exactly two deep, thought-provoking reflection questions focusing on personal application, spiritual growth, and deep contemplation based on this text. Do not include introductory text, just provide the two questions formatted clearly.`
+        const prompt = `You are a thoughtful pastoral assistant. Read the following passage: ${text}. 
+
+Generate exactly two deep, thought-provoking reflection questions focusing on personal application, spiritual growth, and deep contemplation based on this text. 
+
+CRITICAL: Return ONLY the questions. No headers (like "# Questions"), no labels (like "Question 1:"), no introductory text, and no conversational filler. Just the two questions, one per line.`
 
         const textResponse = await window.electron.ipcRenderer.invoke('fetch-ai', {
           prompt: prompt,
           apiKey: apiKey
         })
         
-        // Parse into array, stripping any markdown bullets or numbers like "1. " or "* "
+        // Robust parsing: Filter out headers, labels, and empty lines, then strip numbering
         const qArray = textResponse.split('\n')
-          .filter(q => q.trim().length > 5)
-          .map(q => q.replace(/\*\*/g, '').replace(/^[\d\.\-\*\s]+/, '').trim())
+          .map(q => q.trim())
+          .filter(q => {
+            if (q.length < 5) return false
+            if (q.startsWith('#')) return false // Skip markdown headers
+            if (/^question\s*\d+\s*:?\s*$/i.test(q)) return false // Skip "Question 1:" solo labels
+            return true
+          })
+          .map(q => q
+            .replace(/\*\*/g, '') // Strip bold
+            .replace(/^[\d\.\-\*\s]+/, '') // Strip leading numbers/bullets like "1. " or "* "
+            .replace(/^Question\s*\d+\s*:?\s*/i, '') // Strip "Question 1: " prefix if embedded
+            .trim()
+          )
         setQuestions(qArray.slice(0, 2))
 
         // Record the day we fetched for so we don't re-fetch until tomorrow

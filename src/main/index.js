@@ -1000,7 +1000,20 @@ app.whenReady().then(() => {
   powerMonitor.on('resume', () => {
     console.log('Power resumed, checking for updates...')
     setTimeout(() => checkForUpdates(), 5000) // 5s delay to let network reconnect
+    
+    // Also re-check if we should show the kiosk immediately upon wake
+    if (kioskWindow && shouldShowKiosk()) {
+      kioskWindow.show()
+    }
   })
+
+  // Background trigger cycle: Check every 15 minutes if the devotion should be presented.
+  // This catches day transitions (4:00 AM) or snooze expirations while the computer stays on.
+  setInterval(() => {
+    if (kioskWindow && shouldShowKiosk()) {
+      kioskWindow.show()
+    }
+  }, 15 * 60 * 1000)
 })
 
 

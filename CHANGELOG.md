@@ -2,6 +2,15 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-04-28]
+
+### Added
+- **AI Question Preloading**: Rearchitected the Reflection Screen to start generation in the background as soon as the scripture passage is loaded. This eliminates the waiting period when navigating from the reading to the reflection screen.
+- **Background Trigger Reliability**: Added a 15-minute background polling cycle in the main process. This ensures the devotion "fires" automatically even if the computer stays on through a day transition (4:00 AM) or a snooze expiration, addressing reports of the app not popping up on a new day.
+
+### Fixed
+- **AI Reflection Parsing**: Hardened the parsing logic on the Reflection Screen to correctly handle "chatter" from models like Claude. The engine now explicitly filters out markdown headers, solo labels (e.g., "Question 1:"), and strips embedded prefixes, ensuring only the actual questions are displayed in the UI.
+
 ## [2026-04-21]
 
 ### Added
