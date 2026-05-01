@@ -2,6 +2,14 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-05-01]
+
+### Added
+- **Tray Icon Single-Click**: Added support for launching the application with a single left-click on the system tray icon, complementing the existing right-click context menu for improved user friendliness.
+
+### Fixed
+- **Startup Detection**: Implemented a dedicated `--autostart` flag for system-triggered launches. This allows the application to reliably distinguish between a computer restart and a manual user interaction on Windows, preventing the "already done today" popup from appearing unexpectedly during system startup.
+
 ## [2026-04-28]
 
 ### Added

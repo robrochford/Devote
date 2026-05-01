@@ -99,7 +99,8 @@ protocol.registerSchemesAsPrivileged([{
 const isStartupEnabled = store.get('launchAtStartup') !== false // default to true
 app.setLoginItemSettings({
   openAtLogin: isStartupEnabled,
-  path: app.getPath('exe')
+  path: app.getPath('exe'),
+  args: ['--autostart']
 })
 
 // Configure Auto-Updater
@@ -270,7 +271,7 @@ function createKioskWindow() {
   })
 
   kioskWindow.on('ready-to-show', () => {
-    const wasAutoLaunched = app.getLoginItemSettings().wasOpenedAtLogin
+    const wasAutoLaunched = app.getLoginItemSettings().wasOpenedAtLogin || process.argv.includes('--autostart')
     // Always show if manually launched
     // On auto-launch, only show if the daily conditions are met
     if (!wasAutoLaunched || shouldShowKiosk()) {
@@ -482,6 +483,18 @@ app.whenReady().then(() => {
   ])
   tray.setToolTip('Devote')
   tray.setContextMenu(contextMenu)
+
+  // Feedback: Single click to open
+  tray.on('click', () => {
+    evaluateStreak()
+    checkForUpdates()
+    if (kioskWindow) {
+      kioskWindow.show()
+      kioskWindow.focus()
+    } else {
+      createKioskWindow()
+    }
+  })
 
   // Explicitly destroy tray on quit to avoid "ghost icons" in Windows
   app.on('before-quit', () => {
@@ -984,7 +997,8 @@ app.whenReady().then(() => {
     store.set('launchAtStartup', enabled)
     app.setLoginItemSettings({
       openAtLogin: enabled,
-      path: app.getPath('exe')
+      path: app.getPath('exe'),
+      args: ['--autostart']
     })
     return true
   })
