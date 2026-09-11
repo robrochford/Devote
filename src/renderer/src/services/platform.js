@@ -57,6 +57,15 @@ export async function saveSettings(patch) {
   try {
     const current = await getSettings()
     const updated = { ...current, ...patch }
+    
+    // If day was changed or completedToday reset to false, clear lastCompletedDate
+    if (patch.currentPlanDay !== undefined && patch.currentPlanDay !== current.currentPlanDay) {
+      updated.lastCompletedDate = null
+      updated.completedToday = false
+    } else if (patch.completedToday === false && patch.lastCompletedDate === undefined) {
+      updated.lastCompletedDate = null
+    }
+
     await Preferences.set({
       key: 'devote_settings',
       value: JSON.stringify(updated)

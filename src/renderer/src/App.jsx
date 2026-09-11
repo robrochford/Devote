@@ -145,12 +145,25 @@ export default function App() {
   }
 
   const handleSaveSettings = (newSettings, { withFeedback = false } = {}) => {
-    const updated = { ...settings, ...newSettings }
+    const dayChanged = (newSettings.currentPlanDay !== undefined && newSettings.currentPlanDay !== originalDay) ||
+                       (settings.currentPlanDay !== undefined && settings.currentPlanDay !== originalDay)
+    
+    // When changing day or unlocking, clear lastCompletedDate and completedToday
+    const patch = { ...newSettings }
+    if (dayChanged) {
+      patch.completedToday = false
+      patch.lastCompletedDate = null
+    }
+
+    const updated = { ...settings, ...patch }
     
     // If the user changed the day or unlocked a completed day, 
     // we need to force the UI to reset to the beginning.
-    const needsReset = (updated.currentPlanDay !== originalDay) || 
+    const needsReset = dayChanged || 
                        (currentScreen === 'complete' && updated.completedToday === false)
+
+    const apiKeyChanged = (newSettings.esvApiKey !== undefined && newSettings.esvApiKey !== settings.esvApiKey) ||
+                          (newSettings.aiApiKey !== undefined && newSettings.aiApiKey !== settings.aiApiKey)
     
     setSettings(updated)
     platform.saveSettings(updated)
@@ -159,6 +172,10 @@ export default function App() {
       setCurrentScreen('prayer')
       setResetKey(key => key + 1)
       setJustFinished(false)
+      setOriginalDay(updated.currentPlanDay)
+    } else if (apiKeyChanged) {
+      // Force children screens to reload data with the new key without losing current screen position
+      setResetKey(key => key + 1)
     }
     
     if (withFeedback) {

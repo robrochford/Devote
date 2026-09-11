@@ -2,6 +2,25 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-09-11]
+
+### Added
+- **Android Mobile App (Capacitor)**: Full Android implementation using Capacitor, making Devote a cross-platform app (Electron desktop + Android mobile) from a single React codebase.
+- **Platform Abstraction Layer** (`services/platform.js`): Unified service that routes all API calls (ESV scripture, AI reflections, settings persistence, audio, commentary) between Electron IPC and Capacitor HTTP depending on runtime. All screens are now runtime-agnostic.
+- **Client-Side Plan Generator** (`services/planGenerator.js`): Moved reading plan logic to the renderer for mobile, where there is no Main process. Supports all plan types (devote, chronological, custom alternating).
+- **Bundled MHC Commentary** (`services/matthew_henry_concise.json`): Complete offline commentary dataset bundled into the renderer for instant mobile access without any network dependency.
+- **Commentary Bottom-Sheet Modal**: Replaced the desktop side-panel with a bottom-sheet modal overlay on mobile and a centered modal on desktop. Keeps full screen width on narrow displays.
+- **Android Hardware Back Button**: Implemented hierarchical back navigation (Settings → screens → exit) using the Capacitor App plugin `backButton` event.
+- **Safe Area Inset CSS**: Added `env(safe-area-inset-*)` padding to `index.css` for correct layout on phones with notches and gesture navigation bars.
+- **Mobile Audio Pipeline**: Downloads ESV audio to device cache via Capacitor Filesystem, then plays from a local URI — bypasses CORS and works offline after first load.
+- **Dynamic AI Model Discovery on Mobile**: Full Anthropic/OpenAI/Gemini model discovery and fallback chain ported to `CapacitorHttp` for mobile.
+
+### Fixed
+- **Full-Width Mobile Layout**: Removed desktop `md:max-w-4xl` container constraint so the app fills the full screen width and height on Android.
+- **CORS on Android**: All ESV API and AI provider calls routed through `CapacitorHttp` which bypasses WebView CORS restrictions.
+- **Mobile Settings Not Taking Effect**: Fixed an issue where changing the reading plan day or entering an API key after completing today's devotion did not reset or reload the UI. Changing the plan day now clears `lastCompletedDate` on mobile and forces the UI back to the prayer screen, while updating an API key forces a re-render of downstream components.
+- **Android App Launcher Icon**: Replaced default Capacitor launcher mipmaps with high-resolution Devote brand icons across all densities (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) including adaptive foreground assets.
+
 ## [2026-05-01]
 
 ### Added
