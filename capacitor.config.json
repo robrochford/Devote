@@ -1,0 +1,11 @@
+{
+  "appId": "com.electrode.devote",
+  "appName": "Devote",
+  "webDir": "out/renderer",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

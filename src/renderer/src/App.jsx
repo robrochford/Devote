@@ -6,6 +6,8 @@ import ReflectionScreen from './screens/ReflectionScreen'
 import CompletionScreen from './screens/CompletionScreen'
 import WelcomeScreen from './screens/WelcomeScreen'
 import PlanCompleteScreen from './screens/PlanCompleteScreen'
+import * as platform from './services/platform'
+import { App as CapApp } from '@capacitor/app'
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('prayer')
@@ -22,44 +24,44 @@ export default function App() {
   const [passageText, setPassageText] = useState('')
 
   useEffect(() => {
-    // Load initial settings
-    if (window.electron) {
-      window.electron.ipcRenderer.invoke('get-version').then(v => setAppVersion(v))
-      window.electron.ipcRenderer.invoke('get-settings').then(s => {
-        // Migrate old geminiApiKey to generic aiApiKey if found
-        if (s.geminiApiKey && !s.aiApiKey) {
-          s.aiApiKey = s.geminiApiKey
-        }
+    // Load version and initial settings via platform abstraction
+    platform.getVersion().then(v => setAppVersion(v))
+    platform.getSettings().then(s => {
+      // Migrate old geminiApiKey to generic aiApiKey if found
+      if (s.geminiApiKey && !s.aiApiKey) {
+        s.aiApiKey = s.geminiApiKey
+      }
 
-        // Migration cleanup: If they were accidentally marked as onboarded by the 
-        // lastOpenedDate bug but haven't finished a devotion, reset them.
-        if (s.hasCompletedOnboarding && s.lastCompletedDate === null && !s.planType) {
-           s.hasCompletedOnboarding = false;
-        }
+      // Migration cleanup: If they were accidentally marked as onboarded by the 
+      // lastOpenedDate bug but haven't finished a devotion, reset them.
+      if (s.hasCompletedOnboarding && s.lastCompletedDate === null && !s.planType) {
+         s.hasCompletedOnboarding = false;
+      }
 
-        // Silent migration for users before v1.1
-        if (!s.hasCompletedOnboarding && s.lastCompletedDate !== null) {
-           s.hasCompletedOnboarding = true;
-           window.electron.ipcRenderer.invoke('save-settings', { hasCompletedOnboarding: true })
-        }
+      // Silent migration for users before v1.1
+      if (!s.hasCompletedOnboarding && s.lastCompletedDate !== null) {
+         s.hasCompletedOnboarding = true;
+         platform.saveSettings({ hasCompletedOnboarding: true })
+      }
 
-        setSettings(s)
-        // If today's devotion is already done, jump straight to the completion screen
-        if (s.completedToday) {
-          setCurrentScreen('complete')
-        }
-      })
+      setSettings(s)
+      // If today's devotion is already done, jump straight to the completion screen
+      if (s.completedToday) {
+        setCurrentScreen('complete')
+      }
+    })
 
-      // Store named listener references so removeListener can target them precisely
+    // Electron specific IPC listeners
+    if (platform.isElectron()) {
       const onResetUi = () => {
         setResetKey(prev => prev + 1)
         setCurrentScreen('prayer')
         setJustFinished(false)
-        window.electron.ipcRenderer.invoke('get-settings').then(s => setSettings(s))
+        platform.getSettings().then(s => setSettings(s))
       }
 
       const onWindowShow = () => {
-        window.electron.ipcRenderer.invoke('get-settings').then(s => {
+        platform.getSettings().then(s => {
           setSettings(s)
           setCurrentScreen(prev => {
             if (!s.completedToday && prev === 'complete') {
@@ -90,7 +92,30 @@ export default function App() {
         window.electron.ipcRenderer.removeListener('update-ready', onUpdateReady)
       }
     }
-  }, [])
+
+    // Android hardware back button handler
+    if (platform.isCapacitor()) {
+      const backListener = CapApp.addListener('backButton', () => {
+        if (showSettings) {
+          setShowSettings(false)
+          return
+        }
+        if (currentScreen === 'reflection') {
+          setCurrentScreen('word')
+          return
+        }
+        if (currentScreen === 'word') {
+          setCurrentScreen('prayer')
+          return
+        }
+        CapApp.exitApp()
+      })
+
+      return () => {
+        backListener.then(l => l.remove()).catch(() => {})
+      }
+    }
+  }, [showSettings, currentScreen])
 
   useEffect(() => {
     // Keep frosted glass
@@ -112,11 +137,11 @@ export default function App() {
   }
 
   const handleSnooze = () => {
-    if (window.electron) window.electron.ipcRenderer.send('snooze')
+    platform.snooze()
   }
 
   const handleSkip = () => {
-    if (window.electron) window.electron.ipcRenderer.send('skip-today')
+    platform.skipToday()
   }
 
   const handleSaveSettings = (newSettings, { withFeedback = false } = {}) => {
@@ -128,7 +153,7 @@ export default function App() {
                        (currentScreen === 'complete' && updated.completedToday === false)
     
     setSettings(updated)
-    if (window.electron) window.electron.ipcRenderer.invoke('save-settings', updated)
+    platform.saveSettings(updated)
     
     if (needsReset) {
       setCurrentScreen('prayer')
@@ -149,25 +174,26 @@ export default function App() {
   }
 
   return (
-    <div className="relative w-full max-w-4xl max-h-[90vh] mx-auto animate-fade-in group">
+    <div className="relative w-full h-full md:max-w-4xl md:max-h-[90vh] md:m-auto animate-fade-in group flex flex-col">
       {/* App Container */}
-      <div className="h-[750px] transition-all duration-700 bg-zinc-900/80 backdrop-blur-xl border border-zinc-700/50 rounded-3xl shadow-2xl overflow-hidden relative">
+      <div className="flex-1 w-full h-full transition-all duration-700 bg-zinc-900/90 backdrop-blur-xl md:border md:border-zinc-700/50 md:rounded-3xl shadow-2xl overflow-hidden relative flex flex-col">
         
         {/* Settings Button + Update Badge */}
         {settings.hasCompletedOnboarding && (
-          <div className="absolute bottom-6 left-6 z-[100]">
+          <div className="absolute top-4 left-4 z-[100] md:top-auto md:bottom-6 md:left-6">
             <button 
               onClick={() => {
                 if (!showSettings) setOriginalDay(settings.currentPlanDay)
                 setShowSettings(!showSettings)
               }}
-              className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+              className="p-2.5 rounded-full text-zinc-400 hover:text-white bg-zinc-800/80 hover:bg-white/10 transition-colors opacity-90 md:opacity-0 md:group-hover:opacity-100 shadow-md border border-zinc-700/50 md:border-transparent"
+              title="Settings"
             >
               {showSettings ? <X size={20} /> : <Settings size={20} />}
             </button>
             {updateReady && !showSettings && (
               <div
-                className="absolute -top-8 left-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 border border-green-500/40 text-green-400 text-[10px] font-medium whitespace-nowrap cursor-pointer animate-pulse"
+                className="absolute top-12 left-0 md:top-auto md:-top-8 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 border border-green-500/40 text-green-400 text-[10px] font-medium whitespace-nowrap cursor-pointer animate-pulse"
                 onClick={() => {
                   setOriginalDay(settings.currentPlanDay)
                   setShowSettings(true)
@@ -182,8 +208,17 @@ export default function App() {
 
         {/* Settings Panel */}
         {showSettings && settings.hasCompletedOnboarding && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-2xl z-40 p-10 animate-fade-in flex flex-col justify-center">
-            <h2 className="text-2xl font-serif text-white mb-8">Settings</h2>
+          <div className="absolute inset-0 bg-black/80 md:bg-black/40 backdrop-blur-2xl z-[150] p-6 sm:p-10 animate-fade-in flex flex-col justify-start md:justify-center overflow-y-auto custom-scrollbar">
+            <div className="w-full max-w-md mx-auto pt-12 md:pt-0 pb-10">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-serif text-white">Settings</h2>
+                <button 
+                  onClick={() => setShowSettings(false)}
+                  className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors md:hidden"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             
             <div className="space-y-6 max-w-md">
               <div>
@@ -309,12 +344,13 @@ export default function App() {
                 )}
               </div>
             </div>
+            </div>
           </div>
         )}
 
         {/* Screen Controller */}
         {settings.hasCompletedOnboarding && (
-          <div key={resetKey} className="h-[750px] relative w-full overflow-hidden">
+          <div key={resetKey} className="flex-1 w-full h-full relative overflow-hidden flex flex-col">
             <div className={currentScreen === 'prayer' ? 'absolute inset-0 flex' : 'hidden'}>
                <PrayerScreen onNext={() => handleNext('word')} />
             </div>

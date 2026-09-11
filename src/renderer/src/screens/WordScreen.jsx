@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Headphones, Book, ChevronRight, Loader2 } from 'lucide-react'
+import { Headphones, Book, ChevronRight, Loader2, X } from 'lucide-react'
+import * as platform from '../services/platform'
 
 export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassageLoaded }) {
   const [passageHtml, setPassageHtml] = useState('')
@@ -21,12 +22,12 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
       try {
         // 1. Fetch the reading reference immediately regardless of API key
         // This ensures the header (Day 2, etc) is always correct
-        const reading = await window.electron.ipcRenderer.invoke('get-today-reading')
+        const reading = await platform.getTodayReading()
         setTodayReading(reading)
 
-        // 2. If we haven't received the apiKey prop yet (due to settings loading race),
-        // we bail but keep the loader spinning until it arrives.
-        if (!apiKey) {
+        // 2. Use effective API key (fall back to settings or default key)
+        const effectiveKey = apiKey || settings.esvApiKey || 'd49a24d6323c36fa875b320a42e2ef0c86476c4c'
+        if (!effectiveKey) {
           return
         }
 
@@ -42,14 +43,14 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
           setPassageHtml(html)
           // Strip HTML so ReflectionScreen has clean text for AI prompt
           if (onPassageLoaded) onPassageLoaded(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
-          const q2 = encodeURIComponent(reading.reference)
-          setAudioUrl(`http://127.0.0.1:45678/?q=${q2}`)
+          const audio = await platform.getAudioUrl(reading.reference, effectiveKey)
+          setAudioUrl(audio)
         } else {
           console.log('No cache found or day mismatch, fetching fresh...')
           const q = encodeURIComponent(reading.reference)
-          const data = await window.electron.ipcRenderer.invoke('fetch-esv', {
+          const data = await platform.fetchEsv({
             url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true`,
-            apiKey: apiKey
+            apiKey: effectiveKey
           })
           
           if (data && data.passages && data.passages.length > 0) {
@@ -57,22 +58,22 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
             setPassageHtml(html)
             // Strip HTML so ReflectionScreen has clean text for AI prompt
             if (onPassageLoaded) onPassageLoaded(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
-            const q2 = encodeURIComponent(reading.reference)
-            setAudioUrl(`http://127.0.0.1:45678/?q=${q2}`)
+            const audio = await platform.getAudioUrl(reading.reference, effectiveKey)
+            setAudioUrl(audio)
           } else {
             setError('The ESV API returned no passage content for this reference.')
           }
         }
 
         // Commentary Logic — check custom/AI-generated first, then bundled MHC
-        const customStore = await window.electron.ipcRenderer.invoke('get-custom-commentaries')
+        const customStore = await platform.getCustomCommentaries()
         const commentaryKey = `${reading.book} ${reading.startChapter}`
         
         if (customStore[commentaryKey]) {
           // AI-generated or user-edited commentaries take priority
           setCommentaryText(customStore[commentaryKey])
         } else {
-          const mhcText = await window.electron.ipcRenderer.invoke('get-mhc-entry', commentaryKey)
+          const mhcText = await platform.getMhcEntry(commentaryKey)
           if (mhcText) {
             setCommentaryText(mhcText)
           } else {
@@ -89,7 +90,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
     }
 
     loadData()
-  }, [apiKey, retryKey])
+  }, [apiKey, settings.esvApiKey, retryKey])
 
   // Pause audio whenever the page becomes hidden (Win+Tab, Alt+Tab, minimize, snooze — everything)
   useEffect(() => {
@@ -116,35 +117,34 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
   }
 
   const handleStudyClick = async () => {
-    setShowCommentary(!showCommentary)
-    
-    if (!showCommentary && !commentaryText) {
+    setShowCommentary(true)
+    if (!commentaryText) {
       setCommentaryText("No commentary available for this passage.")
     }
   }
 
   return (
-    <div className="flex-1 flex overflow-hidden animate-slide-in-right relative">
+    <div className="flex-1 flex flex-col w-full h-full overflow-hidden animate-slide-in-right relative">
       
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col transition-all duration-500 p-8 ${showCommentary ? 'w-2/3 pr-4 border-r border-zinc-800' : 'w-full'}`}>
+      <div className="flex-1 flex flex-col w-full h-full p-5 sm:p-8 overflow-hidden">
         
         {/* Header Bar */}
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-800">
-          <div>
-            <h2 className="text-sm text-gold-500 font-medium tracking-widest uppercase mb-1">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-zinc-800 shrink-0">
+          <div className="pl-10 md:pl-0">
+            <h2 className="text-xs sm:text-sm text-gold-500 font-medium tracking-widest uppercase mb-0.5">
               Day {todayReading.day}
             </h2>
-            <h1 className="text-2xl font-serif text-white">
+            <h1 className="text-xl sm:text-2xl font-serif text-white">
               {todayReading.reference}
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {audioUrl && (
               <button 
                 onClick={toggleAudio}
-                className={`p-2 rounded-full transition-colors ${isPlaying ? 'bg-gold-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700'}`}
+                className={`p-2 sm:p-2.5 rounded-full transition-colors ${isPlaying ? 'bg-gold-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700'}`}
                 title="Play Audio"
               >
                 <Headphones size={18} />
@@ -161,7 +161,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
 
             <button 
               onClick={handleStudyClick}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${showCommentary ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition-colors bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700`}
             >
               <Book size={16} />
               Study
@@ -170,13 +170,13 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
         </div>
 
         {/* Text Area */}
-        <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar relative">
+        <div className="flex-1 overflow-y-auto pr-2 sm:pr-4 custom-scrollbar relative">
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader2 className="animate-spin text-zinc-500" size={32} />
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
+            <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-4">
               <p className="text-red-400 text-sm leading-relaxed">{error}</p>
               <button
                 onClick={() => { setError(''); setRetryKey(k => k + 1) }}
@@ -187,34 +187,48 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
             </div>
           ) : (
             <div 
-              className="prose prose-invert prose-p:text-zinc-300 prose-p:leading-loose prose-h2:text-gold-400 prose-h2:font-serif max-w-none pb-20"
+              className="prose prose-invert prose-p:text-zinc-300 prose-p:leading-loose prose-h2:text-gold-400 prose-h2:font-serif max-w-none pb-12"
               dangerouslySetInnerHTML={{ __html: passageHtml }}
             />
           )}
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-6 border-t border-zinc-800 flex justify-end">
+        <div className="pt-4 pb-2 sm:pb-0 sm:pt-6 border-t border-zinc-800 flex justify-end shrink-0">
           <button 
             onClick={onNext}
-            className="flex items-center gap-2 px-6 py-2.5 bg-white text-black font-medium rounded-full hover:bg-zinc-200 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 bg-white text-black font-medium rounded-full hover:bg-zinc-200 transition-all text-sm sm:text-base active:scale-95 shadow-lg"
           >
             Continue to Reflection <ChevronRight size={18} />
           </button>
         </div>
       </div>
 
-      {/* Commentary Side Panel */}
+      {/* Commentary Overlay Modal (Full-width on mobile, overlay drawer on desktop) */}
       {showCommentary && (
-        <div className="w-1/3 bg-zinc-950/50 p-6 overflow-y-auto custom-scrollbar border-l border-zinc-800 animate-slide-in-right flex flex-col">
-          <h3 className="text-gold-500 font-serif text-xl mb-4 border-b border-zinc-800 pb-2">Matthew Henry's Commentary</h3>
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {(() => {
-                // If the text naturally has newlines (e.g. from AI), just use those
+        <div className="absolute inset-0 z-50 bg-black/70 backdrop-blur-md flex flex-col justify-end md:justify-center p-0 md:p-6 animate-fade-in">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-t-3xl md:rounded-2xl max-h-[85vh] md:max-h-[80vh] flex flex-col w-full md:max-w-2xl md:mx-auto shadow-2xl overflow-hidden animate-slide-up">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-zinc-800">
+              <div className="flex items-center gap-2.5">
+                <Book className="text-gold-500" size={20} />
+                <h3 className="text-gold-500 font-serif text-lg sm:text-xl font-medium">Matthew Henry's Commentary</h3>
+              </div>
+              <button
+                onClick={() => setShowCommentary(false)}
+                className="p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                title="Close Commentary"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-4">
+              {(() => {
                 if (commentaryText.includes('\n')) {
                   return commentaryText.split('\n').filter(p => p.trim().length > 0)
                 }
-                // Otherwise, artificially chunk it into paragraphs so it isn't a wall of text
                 const sentences = commentaryText.match(/[^.!?]+[.!?]+[\])'"`’”]*\s*/g) || [commentaryText]
                 const paragraphs = []
                 let currentP = ''
@@ -227,11 +241,22 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
                 })
                 return paragraphs
               })().map((paragraph, idx) => (
-                <p key={idx} className="text-zinc-400 leading-relaxed text-sm mb-5">
+                <p key={idx} className="text-zinc-300 leading-relaxed text-sm sm:text-base">
                   {paragraph.trim()}
                 </p>
               ))}
             </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-zinc-800/80 flex justify-end bg-zinc-900/50">
+              <button
+                onClick={() => setShowCommentary(false)}
+                className="px-5 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Flame, CheckCircle2, Sun } from 'lucide-react'
+import * as platform from '../services/platform'
 
 export default function CompletionScreen({ streak, isActive, alreadyCompleted }) {
   // Fetch confirmed streak from store after complete-devotion fires.
@@ -10,22 +11,20 @@ export default function CompletionScreen({ streak, isActive, alreadyCompleted })
 
   useEffect(() => {
     if (!isActive || alreadyCompleted) return
-    if (window.electron) {
-      window.electron.ipcRenderer.send('complete-devotion')
+    platform.completeDevotion()
 
-      // Short delay to let the main process synchronously commit to electron-store
-      setTimeout(() => {
-        window.electron.ipcRenderer.invoke('get-settings').then(s => {
-          setConfirmedStreak(s.currentStreak)
-        })
-      }, 200)
-      
-      // Auto close after 5 seconds
-      const timer = setTimeout(() => {
-        window.electron.ipcRenderer.send('close-kiosk')
-      }, 5000)
-      return () => clearTimeout(timer)
-    }
+    // Short delay to let the process commit to store/preferences
+    setTimeout(() => {
+      platform.getSettings().then(s => {
+        setConfirmedStreak(s.currentStreak)
+      })
+    }, 200)
+    
+    // Auto close after 5 seconds
+    const timer = setTimeout(() => {
+      platform.closeKiosk()
+    }, 5000)
+    return () => clearTimeout(timer)
   }, [isActive, alreadyCompleted])
 
   // Use confirmed streak from store once available, otherwise fall back to prop
@@ -58,7 +57,7 @@ export default function CompletionScreen({ streak, isActive, alreadyCompleted })
         )}
 
         <button 
-          onClick={() => { if (window.electron) window.electron.ipcRenderer.send('close-kiosk') }}
+          onClick={() => platform.closeKiosk()}
           className="mt-12 text-xs text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
         >
           Close
@@ -101,7 +100,7 @@ export default function CompletionScreen({ streak, isActive, alreadyCompleted })
       </p>
       
       <button 
-        onClick={() => { if (window.electron) window.electron.ipcRenderer.send('close-kiosk') }}
+        onClick={() => platform.closeKiosk()}
         className="mt-4 text-xs text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
       >
         Close Now

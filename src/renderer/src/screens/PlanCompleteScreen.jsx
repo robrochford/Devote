@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import PlanSelector from '../components/PlanSelector'
+import * as platform from '../services/platform'
 
 export default function PlanCompleteScreen({ onResetPlan }) {
   const [step, setStep] = useState(1)
@@ -10,11 +11,9 @@ export default function PlanCompleteScreen({ onResetPlan }) {
   const [isFinishing, setIsFinishing] = useState(false)
 
   useEffect(() => {
-    if (window.electron) {
-      window.electron.ipcRenderer.invoke('get-all-books').then(books => {
-        setAllBooks(books)
-      })
-    }
+    platform.getAllBooks().then(books => {
+      setAllBooks(books)
+    })
   }, [])
 
   const toggleBook = (b) => {
@@ -28,9 +27,9 @@ export default function PlanCompleteScreen({ onResetPlan }) {
   const handleFinish = async () => {
     setIsFinishing(true)
 
-    if (planType === 'custom' && window.electron) {
+    if (planType === 'custom') {
       try {
-        await window.electron.ipcRenderer.invoke('prefetch-mhc-commentaries', {
+        await platform.prefetchMhcCommentaries({
           customBooks: customBooks,
           startDay: 1
         })
