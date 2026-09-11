@@ -41,14 +41,16 @@ jobs:
 
   android:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_TOKEN }}
 
       - name: Install Node.js
         uses: actions/setup-node@v4
