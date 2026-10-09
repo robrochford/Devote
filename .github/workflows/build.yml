@@ -40,6 +40,7 @@ jobs:
         run: npm run ${{ matrix.script }}
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
 
   android:
     runs-on: ubuntu-latest
@@ -87,7 +88,9 @@ jobs:
           echo "Building versionName=$VERSION versionCode=$VERSION_CODE"
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug -PversionName=${{ steps.version.outputs.version_name }} -PversionCode=${{ steps.version.outputs.version_code }}
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug -PversionName=${{ steps.version.outputs.version_name }} -PversionCode=${{ steps.version.outputs.version_code }}
         working-directory: android
 
       - name: Rename APK
@@ -98,4 +101,4 @@ jobs:
         with:
           files: Devote-${{ steps.version.outputs.version_name }}-android.apk
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
