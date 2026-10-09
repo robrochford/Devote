@@ -4,6 +4,11 @@ All notable changes to the Devote application will be documented in this file.
 
 ## [2026-10-09]
 
+### Fixed
+- **Desktop UI Regressions**:
+  - Restored fixed desktop container card height (`md:h-[750px]`) in `App.jsx`, preventing desktop app window from expanding to full screen height while keeping responsive `h-full` on mobile.
+  - Restored desktop commentary slide-in panel in `WordScreen.jsx` so it mounts side-by-side with scripture (`transition-all duration-500`, scripture shrinks to `md:w-2/3` with right border, commentary occupies `md:w-1/3` with left border) rather than overlaying scripture like a modal. Kept bottom-sheet modal overlay on mobile (`< md`).
+
 ### Added
 - **Subscription Licensing Integration (`devote-licensing`)**:
   - Full client-side integration for Devote's subscription licensing via `https://devote.electrodedigital.co.uk/wp-json/devote/v1`.

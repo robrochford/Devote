@@ -117,17 +117,17 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
   }
 
   const handleStudyClick = async () => {
-    setShowCommentary(true)
-    if (!commentaryText) {
+    setShowCommentary(!showCommentary)
+    if (!showCommentary && !commentaryText) {
       setCommentaryText("No commentary available for this passage.")
     }
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full h-full overflow-hidden animate-slide-in-right relative">
+    <div className="flex-1 flex flex-col md:flex-row w-full h-full overflow-hidden animate-slide-in-right relative">
       
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col w-full h-full p-5 sm:p-8 overflow-hidden">
+      <div className={`flex-1 flex flex-col w-full h-full p-5 sm:p-8 overflow-hidden transition-all duration-500 ${showCommentary ? 'md:w-2/3 md:pr-4 md:border-r md:border-zinc-800' : 'w-full'}`}>
         
         {/* Header Bar */}
         <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-zinc-800 shrink-0">
@@ -161,7 +161,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
 
             <button 
               onClick={handleStudyClick}
-              className={`flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition-colors bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition-colors ${showCommentary ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700'}`}
             >
               <Book size={16} />
               Study
@@ -204,15 +204,53 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
         </div>
       </div>
 
-      {/* Commentary Overlay Modal (Full-width on mobile, overlay drawer on desktop) */}
+      {/* Desktop Commentary Side Panel (slides in from right, does not overlay) */}
       {showCommentary && (
-        <div className="absolute inset-0 z-50 bg-black/70 backdrop-blur-md flex flex-col justify-end md:justify-center p-0 md:p-6 animate-fade-in">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-t-3xl md:rounded-2xl max-h-[85vh] md:max-h-[80vh] flex flex-col w-full md:max-w-2xl md:mx-auto shadow-2xl overflow-hidden animate-slide-up">
+        <div className="hidden md:flex md:w-1/3 bg-zinc-950/50 p-6 overflow-y-auto custom-scrollbar border-l border-zinc-800 animate-slide-in-right flex-col shrink-0">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-4">
+            <h3 className="text-gold-500 font-serif text-xl">Matthew Henry's Commentary</h3>
+            <button
+              onClick={() => setShowCommentary(false)}
+              className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              title="Close Commentary"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {(() => {
+              if (commentaryText.includes('\n')) {
+                return commentaryText.split('\n').filter(p => p.trim().length > 0)
+              }
+              const sentences = commentaryText.match(/[^.!?]+[.!?]+[\])'"`’”]*\s*/g) || [commentaryText]
+              const paragraphs = []
+              let currentP = ''
+              sentences.forEach((s, i) => {
+                currentP += s
+                if ((i + 1) % 4 === 0 || i === sentences.length - 1) {
+                  paragraphs.push(currentP.trim())
+                  currentP = ''
+                }
+              })
+              return paragraphs
+            })().map((paragraph, idx) => (
+              <p key={idx} className="text-zinc-300 leading-relaxed text-sm mb-4">
+                {paragraph.trim()}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Mobile-Only Commentary Bottom Sheet Overlay */}
+      {showCommentary && (
+        <div className="md:hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-md flex flex-col justify-end p-0 animate-fade-in">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-t-3xl max-h-[85vh] flex flex-col w-full shadow-2xl overflow-hidden animate-slide-up">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-zinc-800">
               <div className="flex items-center gap-2.5">
                 <Book className="text-gold-500" size={20} />
-                <h3 className="text-gold-500 font-serif text-lg sm:text-xl font-medium">Matthew Henry's Commentary</h3>
+                <h3 className="text-gold-500 font-serif text-lg font-medium">Matthew Henry's Commentary</h3>
               </div>
               <button
                 onClick={() => setShowCommentary(false)}
@@ -241,7 +279,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
                 })
                 return paragraphs
               })().map((paragraph, idx) => (
-                <p key={idx} className="text-zinc-300 leading-relaxed text-sm sm:text-base">
+                <p key={idx} className="text-zinc-300 leading-relaxed text-sm">
                   {paragraph.trim()}
                 </p>
               ))}

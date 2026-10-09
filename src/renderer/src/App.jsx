@@ -208,7 +208,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative w-full h-full md:max-w-4xl md:max-h-[90vh] md:m-auto animate-fade-in group flex flex-col">
+    <div className="relative w-full h-full md:h-[750px] md:max-w-4xl md:m-auto animate-fade-in group flex flex-col">
       {/* App Container */}
       <div className="flex-1 w-full h-full transition-all duration-700 bg-zinc-900/90 backdrop-blur-xl md:border md:border-zinc-700/50 md:rounded-3xl shadow-2xl overflow-hidden relative flex flex-col">
         
