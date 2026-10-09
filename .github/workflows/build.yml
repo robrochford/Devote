@@ -39,8 +39,8 @@ jobs:
       - name: Build and Release Devote
         run: npm run ${{ matrix.script }}
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   android:
     runs-on: ubuntu-latest
@@ -101,4 +101,4 @@ jobs:
         with:
           files: Devote-${{ steps.version.outputs.version_name }}-android.apk
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
