@@ -23,6 +23,15 @@ All notable changes to the Devote application will be documented in this file.
     - 14 automated unit tests covering key formatting, masking, activation responses (success, device limit, inactive, not found), heartbeat transitions, grace periods, offline tolerance, and deactivation.
   - **Documentation**: Added comprehensive `LICENSING.md` guide.
 
+### Fixed
+- **GitHub Actions Release Pipeline**:
+  - Resolved `actions/checkout@v4` authentication issue by adding fallback to standard `${{ secrets.GITHUB_TOKEN }}` and setting `permissions: contents: write`.
+  - Fixed Android execution permission error (code 126) by setting executable mode (`chmod +x` / 100755) on `android/gradlew`.
+  - Removed invalid local machine Java home path (`org.gradle.java.home`) from `android/gradle.properties`.
+  - Upgraded Android Java build toolchain from Java 17 to Java 21 to meet `@capacitor/android: ^8.5.1` compilation requirements.
+  - Resolved electron-builder 401 Bad Credentials by authenticating release publishing via `GITHUB_TOKEN`.
+
+
 
 ## [2026-09-11]
 
