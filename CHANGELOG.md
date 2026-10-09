@@ -30,6 +30,7 @@ All notable changes to the Devote application will be documented in this file.
   - Removed invalid local machine Java home path (`org.gradle.java.home`) from `android/gradle.properties`.
   - Upgraded Android Java build toolchain from Java 17 to Java 21 to meet `@capacitor/android: ^8.5.1` compilation requirements.
   - Resolved electron-builder 401 Bad Credentials by authenticating release publishing via `GITHUB_TOKEN`.
+  - Fixed missing Windows `.exe` and macOS `.dmg` release assets caused by `package.json` version (`1.2.44`) being behind GitHub release tag (`v1.2.48`). Synchronized `package.json` version to `1.2.49` so `electron-builder` publishes desktop assets to matching release tags.
 
 
 
