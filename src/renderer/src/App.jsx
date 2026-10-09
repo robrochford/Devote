@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Settings, X } from 'lucide-react'
+import { Settings, X, KeyRound, AlertTriangle, CheckCircle2, ShieldCheck, Mail, Laptop } from 'lucide-react'
 import PrayerScreen from './screens/PrayerScreen'
 import WordScreen from './screens/WordScreen'
 import ReflectionScreen from './screens/ReflectionScreen'
 import CompletionScreen from './screens/CompletionScreen'
 import WelcomeScreen from './screens/WelcomeScreen'
 import PlanCompleteScreen from './screens/PlanCompleteScreen'
+import LicenseScreen from './screens/LicenseScreen'
 import * as platform from './services/platform'
 import { App as CapApp } from '@capacitor/app'
 
@@ -22,6 +23,10 @@ export default function App() {
   const [updateVersion, setUpdateVersion] = useState('')
   const [checkingUpdate, setCheckingUpdate] = useState(false)
   const [passageText, setPassageText] = useState('')
+  const [licenseInfo, setLicenseInfo] = useState(null)
+  const [isDeactivating, setIsDeactivating] = useState(false)
+  const [isCheckingLicense, setIsCheckingLicense] = useState(false)
+  const [licenseFeedback, setLicenseFeedback] = useState('')
 
   useEffect(() => {
     // Load version and initial settings via platform abstraction
@@ -51,6 +56,11 @@ export default function App() {
       }
     })
 
+    // Load initial license status
+    platform.getLicenseStatus().then(status => {
+      setLicenseInfo(status)
+    })
+
     // Electron specific IPC listeners
     if (platform.isElectron()) {
       const onResetUi = () => {
@@ -61,6 +71,7 @@ export default function App() {
       }
 
       const onWindowShow = () => {
+        platform.getLicenseStatus().then(lic => setLicenseInfo(lic))
         platform.getSettings().then(s => {
           setSettings(s)
           setCurrentScreen(prev => {
@@ -82,14 +93,20 @@ export default function App() {
         setUpdateVersion(version)
       }
 
+      const onLicenseChanged = (updated) => {
+        setLicenseInfo(updated)
+      }
+
       window.electron.ipcRenderer.on('reset-ui', onResetUi)
       window.electron.ipcRenderer.on('window-show', onWindowShow)
       window.electron.ipcRenderer.on('update-ready', onUpdateReady)
+      window.electron.ipcRenderer.on('license-status-changed', onLicenseChanged)
 
       return () => {
         window.electron.ipcRenderer.removeListener('reset-ui', onResetUi)
         window.electron.ipcRenderer.removeListener('window-show', onWindowShow)
         window.electron.ipcRenderer.removeListener('update-ready', onUpdateReady)
+        window.electron.ipcRenderer.removeListener('license-status-changed', onLicenseChanged)
       }
     }
 
@@ -281,6 +298,96 @@ export default function App() {
                 <p className="text-[10px] text-zinc-600 mt-2 px-1">Jumping to a day will unlock it if previously completed.</p>
               </div>
 
+              {/* License Panel */}
+              <div className="p-4 rounded-xl bg-zinc-800/60 border border-zinc-700/60 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-white font-medium text-sm">
+                    <ShieldCheck size={16} className="text-amber-400" />
+                    <span>Devote Subscription</span>
+                  </div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider ${
+                    licenseInfo?.status === 'active'
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                      : licenseInfo?.status === 'past_due'
+                      ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                      : 'bg-red-500/15 text-red-300 border border-red-500/30'
+                  }`}>
+                    {licenseInfo?.status || 'Unknown'}
+                  </span>
+                </div>
+
+                <div className="text-xs space-y-1.5 text-zinc-400">
+                  <div className="flex justify-between items-center">
+                    <span className="text-zinc-500 text-[11px]">Key</span>
+                    <span className="font-mono text-white text-[11px]">{licenseInfo?.maskedKey || '••••-••••-••••-••••'}</span>
+                  </div>
+                  {licenseInfo?.customer?.email && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 text-[11px]">Account</span>
+                      <span className="text-zinc-300 text-[11px] truncate max-w-[200px]">{licenseInfo.customer.email}</span>
+                    </div>
+                  )}
+                  {licenseInfo?.lastCheckedAt && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 text-[11px]">Last Verified</span>
+                      <span className="text-zinc-400 text-[10px]">{new Date(licenseInfo.lastCheckedAt).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                  <p className="text-[10px] text-zinc-500 pt-1">
+                    1 license works on up to 3 devices simultaneously.
+                  </p>
+                </div>
+
+                {licenseFeedback && (
+                  <p className="text-[11px] text-amber-300 bg-amber-500/10 p-2 rounded border border-amber-500/20">
+                    {licenseFeedback}
+                  </p>
+                )}
+
+                <div className="pt-2 flex flex-col sm:flex-row gap-2 border-t border-zinc-700/40">
+                  <button
+                    type="button"
+                    disabled={isDeactivating}
+                    onClick={async () => {
+                      if (confirm('Deactivate Devote on this device? You can activate it again later with your license key.')) {
+                        setIsDeactivating(true)
+                        try {
+                          await platform.deactivateLicense()
+                          setLicenseInfo({ isLicensed: false, status: 'unlicensed' })
+                          setShowSettings(false)
+                        } finally {
+                          setIsDeactivating(false)
+                        }
+                      }
+                    }}
+                    className="flex-1 py-1.5 px-3 text-[11px] bg-zinc-800 hover:bg-red-950/40 hover:text-red-300 text-zinc-400 rounded-lg border border-zinc-700 transition-colors"
+                  >
+                    {isDeactivating ? 'Deactivating...' : 'Deactivate this device'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSettings(false)
+                      setLicenseInfo({ isLicensed: false, status: 'unlicensed' })
+                    }}
+                    className="flex-1 py-1.5 px-3 text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg border border-zinc-700 transition-colors"
+                  >
+                    Change key
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.location.href = 'mailto:support@electrodedigital.co.uk?subject=Devote%20Subscription%20Support'
+                    }}
+                    className="flex-1 py-1.5 px-3 text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg border border-zinc-700 transition-colors"
+                  >
+                    Manage subscription
+                  </button>
+                </div>
+              </div>
+
               <div className="pt-6 flex gap-4 border-t border-zinc-800">
                 <button 
                   onClick={handleSnooze}
@@ -365,8 +472,28 @@ export default function App() {
           </div>
         )}
 
-        {/* Screen Controller */}
-        {settings.hasCompletedOnboarding && (
+        {/* Non-blocking Past Due Billing Banner */}
+        {licenseInfo?.isLicensed && licenseInfo?.status === 'past_due' && licenseInfo?.inGracePeriod && (
+          <div className="w-full bg-amber-500/20 border-b border-amber-500/30 px-4 py-2 flex items-center justify-between text-xs text-amber-200 z-[90]">
+            <div className="flex items-center gap-2">
+              <AlertTriangle size={15} className="text-amber-400 shrink-0" />
+              <span>
+                <strong>Payment issue:</strong> please update your billing. {licenseInfo.daysRemainingInGrace} days remaining in grace period.
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                window.location.href = 'mailto:support@electrodedigital.co.uk?subject=Devote%20Billing%20Update'
+              }}
+              className="underline text-amber-300 hover:text-white font-medium"
+            >
+              Update Billing
+            </button>
+          </div>
+        )}
+
+        {/* Screen Controller (Only if Licensed & Onboarded) */}
+        {licenseInfo?.isLicensed && settings.hasCompletedOnboarding && (
           <div key={resetKey} className="flex-1 w-full h-full relative overflow-hidden flex flex-col">
             <div className={currentScreen === 'prayer' ? 'absolute inset-0 flex' : 'hidden'}>
                <PrayerScreen onNext={() => handleNext('word')} />
@@ -406,11 +533,23 @@ export default function App() {
         )}
 
         {/* Overlays for special states */}
-        {!settings.hasCompletedOnboarding && Object.keys(settings).length > 0 && (
+        {/* 1. Unlicensed Gate: Shown whenever not licensed (fresh install, expired grace, or offline limit) */}
+        {licenseInfo !== null && !licenseInfo.isLicensed && (
+          <LicenseScreen
+            currentLicense={licenseInfo}
+            onActivated={(result) => {
+              platform.getLicenseStatus().then(status => setLicenseInfo(status))
+            }}
+          />
+        )}
+
+        {/* 2. Onboarding Gate: Shown after license is active if user hasn't onboarded yet */}
+        {licenseInfo?.isLicensed && !settings.hasCompletedOnboarding && Object.keys(settings).length > 0 && (
           <WelcomeScreen onComplete={handleSaveSettings} />
         )}
 
-        {settings.currentPlanDay > 365 && settings.hasCompletedOnboarding && (
+        {/* 3. Plan Completion */}
+        {licenseInfo?.isLicensed && settings.currentPlanDay > 365 && settings.hasCompletedOnboarding && (
           <PlanCompleteScreen onResetPlan={handleSaveSettings} />
         )}
 

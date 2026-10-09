@@ -2,6 +2,28 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-10-09]
+
+### Added
+- **Subscription Licensing Integration (`devote-licensing`)**:
+  - Full client-side integration for Devote's subscription licensing via `https://devote.electrodedigital.co.uk/wp-json/devote/v1`.
+  - Supports 3 concurrent devices per license with Crockford/Base32 formatted keys (`DVT-XXXX-XXXX-XXXX-XXXX`).
+  - **LicenseService Core Module** (`src/main/licenseService.js`):
+    - Generates stable, machine-specific device identifiers derived from Windows Registry MachineGuid or macOS IOPlatformUUID, hashed using SHA-256 (raw hardware IDs are never logged or transmitted).
+    - Encrypts license keys, statuses, and customer information with Electron's OS-backed `safeStorage`.
+    - Implements non-blocking startup check, 24-hour periodic heartbeats, and sleep/resume re-checks.
+    - Offline tolerance: permits up to 14 days of full functionality without network access before requiring validation.
+    - Past Due Grace Period: provides a 7-day non-blocking grace period with in-app banner for payment failures before access is restricted.
+  - **Activation Screen** (`src/renderer/src/screens/LicenseScreen.jsx`):
+    - Dark/amber styled activation gate with auto-uppercase, key formatting, format pre-validation, direct buy link (`/#pricing`), and support mailto link.
+    - Clear user guidance for device limit cases with deactivation instructions.
+  - **Settings Subscription Panel** (`src/renderer/src/App.jsx`):
+    - Added license status card showing masked keys (`DVT-••••-••••-••••-XXXX`), account email, last verified date, "Deactivate this device", "Change key", and "Manage subscription".
+  - **Unit Test Suite** (`test/licenseService.test.js`):
+    - 14 automated unit tests covering key formatting, masking, activation responses (success, device limit, inactive, not found), heartbeat transitions, grace periods, offline tolerance, and deactivation.
+  - **Documentation**: Added comprehensive `LICENSING.md` guide.
+
+
 ## [2026-09-11]
 
 ### Added

@@ -385,3 +385,64 @@ export async function minimizeWindow() {
     CapApp.exitApp()
   }
 }
+
+export async function getLicenseStatus() {
+  if (isElectron()) {
+    return window.electron.ipcRenderer.invoke('get-license-status')
+  }
+  // Mobile fallback - assume active if already stored
+  try {
+    const { value } = await Preferences.get({ key: 'devote_license' })
+    if (value) return JSON.parse(value)
+  } catch {}
+  return { isLicensed: false, status: 'unlicensed' }
+}
+
+export async function activateLicense(licenseKey) {
+  if (isElectron()) {
+    return window.electron.ipcRenderer.invoke('activate-license', licenseKey)
+  }
+  // Mobile direct call
+  try {
+    const cleanKey = licenseKey.trim().toUpperCase()
+    const res = await CapacitorHttp.post({
+      url: 'https://devote.electrodedigital.co.uk/wp-json/devote/v1/license/activate',
+      headers: { 'Content-Type': 'application/json' },
+      data: {
+        license_key: cleanKey,
+        device_id: 'mobile-' + Math.random().toString(36).substring(2, 10),
+        device_name: 'Devote Mobile',
+        platform: 'android'
+      }
+    })
+    if (res.status === 200) {
+      const payload = {
+        isLicensed: true,
+        status: 'active',
+        customer: res.data?.customer,
+        maskedKey: cleanKey
+      }
+      await Preferences.set({ key: 'devote_license', value: JSON.stringify(payload) })
+      return { success: true, message: 'License activated successfully.' }
+    }
+    return { success: false, message: res.data?.message || 'Activation failed' }
+  } catch (err) {
+    return { success: false, message: 'Network error' }
+  }
+}
+
+export async function deactivateLicense() {
+  if (isElectron()) {
+    return window.electron.ipcRenderer.invoke('deactivate-license')
+  }
+  await Preferences.remove({ key: 'devote_license' })
+  return { success: true }
+}
+
+export async function checkLicense() {
+  if (isElectron()) {
+    return window.electron.ipcRenderer.invoke('check-license')
+  }
+  return { success: true, status: 'active' }
+}
+

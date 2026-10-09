@@ -19,6 +19,7 @@
     "release:win": "npm run build && electron-builder --win -p always",
     "release:mac": "npm run build && electron-builder --mac -p always",
     "snapshot": "node scripts/snapshot.mjs",
+    "test": "node --test test/**/*.test.js",
     "cap:sync": "cap sync android",
     "cap:build": "npm run build && npx cap sync android",
     "cap:open": "npx cap open android"

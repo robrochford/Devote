@@ -8,8 +8,10 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import Store from 'electron-store'
 
 import { getReadingForDay, allBooksDict } from './planGenerator'
+import { LicenseService, maskLicenseKey } from './licenseService'
 
 const store = new Store()
+const licenseService = new LicenseService(store)
 
 let bundledMHC = {}
 try {
@@ -533,6 +535,36 @@ app.whenReady().then(() => {
     hideKiosk()
   })
 
+  // Licensing IPC Handlers
+  ipcMain.handle('get-license-status', () => {
+    return licenseService.getStatus()
+  })
+
+  ipcMain.handle('activate-license', async (_, key) => {
+    const res = await licenseService.activate(key)
+    if (kioskWindow && !kioskWindow.isDestroyed()) {
+      kioskWindow.webContents.send('license-status-changed', licenseService.getStatus())
+    }
+    return res
+  })
+
+  ipcMain.handle('deactivate-license', async () => {
+    const res = await licenseService.deactivate()
+    if (kioskWindow && !kioskWindow.isDestroyed()) {
+      kioskWindow.webContents.send('license-status-changed', licenseService.getStatus())
+    }
+    return res
+  })
+
+  ipcMain.handle('check-license', async () => {
+    const res = await licenseService.check()
+    const status = licenseService.getStatus()
+    if (kioskWindow && !kioskWindow.isDestroyed()) {
+      kioskWindow.webContents.send('license-status-changed', status)
+    }
+    return { ...res, currentStatus: status }
+  })
+
   // IPC Handlers
   ipcMain.handle('get-settings', () => {
     const s = store.store
@@ -1019,6 +1051,44 @@ app.whenReady().then(() => {
     if (kioskWindow && shouldShowKiosk()) {
       kioskWindow.show()
     }
+  })
+
+  // Background license verification: check on startup (after window settles) without blocking
+  setTimeout(async () => {
+    try {
+      await licenseService.check()
+      if (kioskWindow && !kioskWindow.isDestroyed()) {
+        kioskWindow.webContents.send('license-status-changed', licenseService.getStatus())
+      }
+    } catch (e) {
+      console.warn('Initial license check failed (offline or network error):', e.message)
+    }
+  }, 4000)
+
+  // Periodic heartbeat: check license every 24 hours while running
+  setInterval(async () => {
+    try {
+      await licenseService.check()
+      if (kioskWindow && !kioskWindow.isDestroyed()) {
+        kioskWindow.webContents.send('license-status-changed', licenseService.getStatus())
+      }
+    } catch (e) {
+      console.warn('24h periodic license check failed:', e.message)
+    }
+  }, 24 * 60 * 60 * 1000)
+
+  // Re-check license on power resume from sleep
+  powerMonitor.on('resume', async () => {
+    setTimeout(async () => {
+      try {
+        await licenseService.check()
+        if (kioskWindow && !kioskWindow.isDestroyed()) {
+          kioskWindow.webContents.send('license-status-changed', licenseService.getStatus())
+        }
+      } catch (e) {
+        console.warn('Wake resume license check failed:', e.message)
+      }
+    }, 6000)
   })
 
   // Background trigger cycle: Check every 15 minutes if the devotion should be presented.
