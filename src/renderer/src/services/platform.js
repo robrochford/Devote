@@ -3,7 +3,7 @@ import { Preferences } from '@capacitor/preferences'
 import { Filesystem, Directory } from '@capacitor/filesystem'
 import { App as CapApp } from '@capacitor/app'
 import { getReadingForDay, allBooksDict } from './planGenerator'
-import { computeStreakStatus } from '../../main/streak'
+import { computeStreakStatus } from './streak'
 import bundledMHC from './matthew_henry_concise.json'
 
 export const isElectron = () => typeof window !== 'undefined' && Boolean(window.electron && window.electron.ipcRenderer)
