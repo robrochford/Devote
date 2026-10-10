@@ -234,19 +234,13 @@ jobs:
 
       - name: Install dependencies
         if: steps.check_ios.outputs.should_run == 'true'
-        run: |
-          npm install
-          npm install @capacitor/ios@8.5.3
+        run: npm install
 
-      - name: Build web assets and add/sync iOS
+      - name: Build web assets and sync iOS
         if: steps.check_ios.outputs.should_run == 'true'
         run: |
           npm run build
-          mkdir -p out/renderer
-          npx cap add ios
-          cd ios/App && pod install && cd ../..
           npx cap sync ios
-          ls -la ios/App
 
       - name: Extract version info from package.json
         if: steps.check_ios.outputs.should_run == 'true'
@@ -255,10 +249,10 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "version_name=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Build iOS Xcode Archive
+      - name: Build iOS Xcode Project
         if: steps.check_ios.outputs.should_run == 'true'
         run: |
-          xcodebuild -workspace ios/App/App.xcworkspace \
+          xcodebuild -project ios/App/App.xcodeproj \
                      -scheme App \
                      -configuration Release \
                      -destination 'generic/platform=iOS' \
@@ -270,9 +264,9 @@ jobs:
       - name: Package iOS Build Artifacts
         if: steps.check_ios.outputs.should_run == 'true'
         run: |
-          cd ios/App
-          zip -r ../../Devote-${{ steps.version.outputs.version_name }}-ios-project.zip App.xcworkspace Pods
-          cd ../..
+          cd ios
+          zip -r ../Devote-${{ steps.version.outputs.version_name }}-ios-project.zip App
+          cd ..
 
       - name: Upload iOS Project to GitHub Release
         if: steps.check_ios.outputs.should_run == 'true'
