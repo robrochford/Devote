@@ -565,6 +565,15 @@ app.whenReady().then(() => {
     return { ...res, currentStatus: status }
   })
 
+  ipcMain.handle('open-customer-portal', async () => {
+    const res = await licenseService.createCustomerPortalSession()
+    if (res.success && res.portalUrl) {
+      shell.openExternal(res.portalUrl)
+      return { success: true }
+    }
+    return res
+  })
+
   // IPC Handlers
   ipcMain.handle('get-settings', () => {
     const s = store.store

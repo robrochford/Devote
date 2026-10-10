@@ -446,3 +446,29 @@ export async function checkLicense() {
   return { success: true, status: 'active' }
 }
 
+export async function openCustomerPortal() {
+  if (isElectron()) {
+    return window.electron.ipcRenderer.invoke('open-customer-portal')
+  }
+  // Mobile / browser direct fallback
+  try {
+    const { value } = await Preferences.get({ key: 'devote_license' })
+    const license = value ? JSON.parse(value) : null
+    if (!license?.maskedKey) {
+      return { success: false, message: 'No license key found' }
+    }
+    const res = await CapacitorHttp.post({
+      url: 'https://devote.electrodedigital.co.uk/wp-json/devote/v1/license/customer-portal',
+      headers: { 'Content-Type': 'application/json' },
+      data: { license_key: license.maskedKey }
+    })
+    if (res.status === 200 && res.data?.portal_url) {
+      window.open(res.data.portal_url, '_blank')
+      return { success: true }
+    }
+    return { success: false, message: res.data?.message || 'Could not open billing portal' }
+  } catch (err) {
+    return { success: false, message: err.message || 'Network error reaching billing portal' }
+  }
+}
+

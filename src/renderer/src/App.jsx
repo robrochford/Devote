@@ -378,8 +378,22 @@ export default function App() {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      window.location.href = 'mailto:support@electrodedigital.co.uk?subject=Devote%20Subscription%20Support'
+                    onClick={async () => {
+                      setLicenseFeedback('Opening billing portal...')
+                      try {
+                        const res = await platform.openCustomerPortal()
+                        if (res && !res.success) {
+                          setLicenseFeedback(res.message || 'Could not open portal')
+                          // Fallback to mailto if portal could not be created (e.g. offline or manual key)
+                          setTimeout(() => {
+                            window.location.href = 'mailto:support@electrodedigital.co.uk?subject=Devote%20Subscription%20Support'
+                          }, 800)
+                        } else {
+                          setLicenseFeedback('')
+                        }
+                      } catch {
+                        window.location.href = 'mailto:support@electrodedigital.co.uk?subject=Devote%20Subscription%20Support'
+                      }
                     }}
                     className="flex-1 py-1.5 px-3 text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg border border-zinc-700 transition-colors"
                   >
@@ -482,8 +496,15 @@ export default function App() {
               </span>
             </div>
             <button
-              onClick={() => {
-                window.location.href = 'mailto:support@electrodedigital.co.uk?subject=Devote%20Billing%20Update'
+              onClick={async () => {
+                try {
+                  const res = await platform.openCustomerPortal()
+                  if (!res?.success) {
+                    window.location.href = 'mailto:support@electrodedigital.co.uk?subject=Devote%20Billing%20Update'
+                  }
+                } catch {
+                  window.location.href = 'mailto:support@electrodedigital.co.uk?subject=Devote%20Billing%20Update'
+                }
               }}
               className="underline text-amber-300 hover:text-white font-medium"
             >

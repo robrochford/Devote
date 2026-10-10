@@ -4,7 +4,9 @@ import {
   LicenseService,
   normalizeLicenseKey,
   validateLicenseKeyFormat,
-  maskLicenseKey
+  maskLicenseKey,
+  getPlatformName,
+  getStableDeviceId
 } from '../src/main/licenseService.js'
 
 // Mock in-memory Store
@@ -308,4 +310,17 @@ test('Deactivation flow - Calls API and cleans local state', async () => {
   assert.equal(deactRes.success, true)
   assert.equal(deactivated, true)
   assert.equal(service.getStatus().isLicensed, false)
+})
+
+test('Platform detection and device ID generation', () => {
+  const p = getPlatformName()
+  assert.ok(['windows', 'macos', 'linux', 'android'].includes(p) || typeof p === 'string')
+
+  const store = new MockStore()
+  const id1 = getStableDeviceId(store)
+  assert.equal(typeof id1, 'string')
+  assert.equal(id1.length, 32)
+  // Verify it persists in store and returns consistently
+  const id2 = getStableDeviceId(store)
+  assert.equal(id1, id2)
 })

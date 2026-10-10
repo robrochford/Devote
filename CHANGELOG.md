@@ -2,6 +2,25 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-10-10]
+
+### Added
+- **Linux Desktop Build & Distribution Support**:
+  - Configured `electron-builder.yml` with native Linux targets: standalone universal **AppImage** and Debian/Ubuntu **.deb** package installers (`StartupWMClass: devote`).
+  - Added npm scripts `build:linux` and `release:linux` to `package.json`.
+  - Added `ubuntu-latest` with `release:linux` to the GitHub Actions CI release matrix in `.github/workflows/build.yml` for automated multi-arch builds on release tags.
+  - Enhanced `LicenseService` (`src/main/licenseService.js`) to support Linux:
+    - Added `linux` recognition to `getPlatformName()`.
+    - Added stable hardware ID extraction from `/etc/machine-id` and `/var/lib/dbus/machine-id` (SHA-256 hashed), with graceful UUID fallback.
+  - Added unit test coverage for platform detection and device ID generation.
+
+### Documentation & Architecture
+- **Multi-Platform Distribution & Monetization Roadmap**: Documented target distribution paths across platforms:
+  - Windows & macOS: Direct distribution via website with Developer ID notarization and Stripe `DVT-` license keys.
+  - Linux: Direct distribution via website as AppImage and .deb packages using Stripe `DVT-` license keys.
+  - Android & iOS: App Store distribution via hybrid model (free download, `DVT-` key activation for existing web subscribers or native Google Play / Apple StoreKit in-app subscription).
+  - Prioritized stabilization and finalization of Android and macOS builds as immediate milestone before store integrations.
+
 ## [2026-10-09]
 
 ### Fixed

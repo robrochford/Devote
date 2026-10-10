@@ -13,12 +13,14 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
         include:
           - os: macos-latest
             script: release:mac
           - os: windows-latest
             script: release:win
+          - os: ubuntu-latest
+            script: release:linux
 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true

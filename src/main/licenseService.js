@@ -1,4 +1,5 @@
 import { execSync } from 'child_process'
+import { existsSync, readFileSync } from 'fs'
 import { hostname, platform as getPlatform } from 'os'
 import { createHash, randomUUID } from 'crypto'
 let cachedSafeStorage = undefined
@@ -79,6 +80,7 @@ export function getPlatformName() {
   const p = getPlatform()
   if (p === 'win32') return 'windows'
   if (p === 'darwin') return 'macos'
+  if (p === 'linux') return 'linux'
   if (p === 'android') return 'android'
   return p
 }
@@ -122,6 +124,13 @@ export function getStableDeviceId(store) {
       const match = output.match(/"IOPlatformUUID"\s*=\s*"([^"]+)"/)
       if (match && match[1]) {
         rawMachineSeed = match[1].trim()
+      }
+    } else if (process.platform === 'linux') {
+      // Modern Linux distributions populate /etc/machine-id or /var/lib/dbus/machine-id
+      if (existsSync('/etc/machine-id')) {
+        rawMachineSeed = readFileSync('/etc/machine-id', 'utf8').trim()
+      } else if (existsSync('/var/lib/dbus/machine-id')) {
+        rawMachineSeed = readFileSync('/var/lib/dbus/machine-id', 'utf8').trim()
       }
     }
   } catch (err) {
@@ -507,5 +516,32 @@ export class LicenseService {
 
     this.clearRecord()
     return { success: true, message: 'Device deactivated.' }
+  }
+
+  /**
+   * POST /license/customer-portal
+   * Returns a self-service Stripe Customer Portal session URL for subscription management & cancellation
+   */
+  async createCustomerPortalSession() {
+    const record = this.getRecord()
+    if (!record || !record.licenseKey) {
+      return { success: false, message: 'No active license found on this device.' }
+    }
+
+    try {
+      const res = await this.fetchFn(`${this.apiBaseUrl}/license/customer-portal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ license_key: record.licenseKey })
+      })
+
+      const data = await res.json()
+      if (res.ok && data.success && data.portal_url) {
+        return { success: true, portalUrl: data.portal_url }
+      }
+      return { success: false, message: data.message || 'Could not open billing portal.' }
+    } catch (err) {
+      return { success: false, message: err.message || 'Network error reaching billing portal.' }
+    }
   }
 }

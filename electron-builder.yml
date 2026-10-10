@@ -32,6 +32,15 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+linux:
+  category: Utility
+  executableName: devote
+  artifactName: ${name}-${version}.${ext}
+  target:
+    - AppImage
+    - deb
+  desktop:
+    StartupWMClass: devote
 npmRebuild: false
 publish:
   provider: github

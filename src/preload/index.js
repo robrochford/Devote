@@ -40,7 +40,8 @@ if (process.contextIsolated) {
             'get-custom-commentaries', 'save-custom-commentary',
             'get-today-reading', 'get-all-books', 'get-version',
             'check-for-updates', 'get-mhc-entry', 'prefetch-mhc-commentaries',
-            'get-license-status', 'activate-license', 'deactivate-license', 'check-license'
+            'get-license-status', 'activate-license', 'deactivate-license', 'check-license',
+            'open-customer-portal'
           ]
           if (validChannels.includes(channel)) {
             return ipcRenderer.invoke(channel, ...args)
