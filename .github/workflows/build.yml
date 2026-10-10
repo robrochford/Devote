@@ -234,7 +234,9 @@ jobs:
 
       - name: Install dependencies
         if: steps.check_ios.outputs.should_run == 'true'
-        run: npm install
+        run: |
+          npm install
+          npm install @capacitor/ios@8.5.3
 
       - name: Build web assets and add/sync iOS
         if: steps.check_ios.outputs.should_run == 'true'
