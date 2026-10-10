@@ -4,6 +4,20 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build and release'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - desktop (win, mac, linux)
+          - windows
+          - macos
+          - linux
+          - android
 
 jobs:
   release:
@@ -13,32 +27,66 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
         include:
           - os: macos-latest
             script: release:mac
+            platform_id: macos
           - os: windows-latest
             script: release:win
+            platform_id: windows
           - os: ubuntu-latest
             script: release:linux
+            platform_id: linux
 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
+      - name: Determine if platform should run
+        id: check_platform
+        shell: bash
+        run: |
+          TAG="${{ github.ref_name }}"
+          INPUT_PLATFORM="${{ github.event.inputs.platform }}"
+          CURRENT="${{ matrix.platform_id }}"
+          SHOULD_RUN="false"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "$INPUT_PLATFORM" = "all" ] || [ "$INPUT_PLATFORM" = "$CURRENT" ] || { [ "$INPUT_PLATFORM" = "desktop (win, mac, linux)" ] && [ "$CURRENT" != "android" ]; }; then
+              SHOULD_RUN="true"
+            fi
+          else
+            # Triggered by Git Tag
+            # Standard tags (e.g. v1.2.52) run everything
+            if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              SHOULD_RUN="true"
+            elif [[ "$TAG" =~ -desktop$ ]] && [ "$CURRENT" != "android" ]; then
+              SHOULD_RUN="true"
+            elif [[ "$TAG" =~ -${CURRENT}$ ]]; then
+              SHOULD_RUN="true"
+            fi
+          fi
+
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          echo "Platform $CURRENT evaluation: should_run=$SHOULD_RUN"
+
       - name: Check out Git repository
+        if: steps.check_platform.outputs.should_run == 'true'
         uses: actions/checkout@v4
 
       - name: Install Node.js
+        if: steps.check_platform.outputs.should_run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 24
           architecture: x64
 
       - name: Install dependencies
+        if: steps.check_platform.outputs.should_run == 'true'
         run: npm install
 
       - name: Build and Release Devote
+        if: steps.check_platform.outputs.should_run == 'true'
         run: npm run ${{ matrix.script }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -54,32 +102,63 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
+      - name: Determine if Android should run
+        id: check_android
+        shell: bash
+        run: |
+          TAG="${{ github.ref_name }}"
+          INPUT_PLATFORM="${{ github.event.inputs.platform }}"
+          SHOULD_RUN="false"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "$INPUT_PLATFORM" = "all" ] || [ "$INPUT_PLATFORM" = "android" ]; then
+              SHOULD_RUN="true"
+            fi
+          else
+            # Standard tags (e.g. v1.2.52) run all platforms
+            if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              SHOULD_RUN="true"
+            elif [[ "$TAG" =~ -android$ ]]; then
+              SHOULD_RUN="true"
+            fi
+          fi
+
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          echo "Android evaluation: should_run=$SHOULD_RUN"
+
       - name: Check out Git repository
+        if: steps.check_android.outputs.should_run == 'true'
         uses: actions/checkout@v4
 
       - name: Install Node.js
+        if: steps.check_android.outputs.should_run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 24
 
       - name: Install dependencies
+        if: steps.check_android.outputs.should_run == 'true'
         run: npm install
 
       - name: Set up Java 21
+        if: steps.check_android.outputs.should_run == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
       - name: Set up Android SDK
+        if: steps.check_android.outputs.should_run == 'true'
         uses: android-actions/setup-android@v4
         with:
           packages: 'platform-tools'
 
       - name: Build web assets and sync Capacitor
+        if: steps.check_android.outputs.should_run == 'true'
         run: npm run cap:build
 
       - name: Extract version info from package.json
+        if: steps.check_android.outputs.should_run == 'true'
         id: version
         run: |
           VERSION=$(node -p "require('./package.json').version")
@@ -90,15 +169,18 @@ jobs:
           echo "Building versionName=$VERSION versionCode=$VERSION_CODE"
 
       - name: Build debug APK
+        if: steps.check_android.outputs.should_run == 'true'
         run: |
           chmod +x ./gradlew
           ./gradlew assembleDebug -PversionName=${{ steps.version.outputs.version_name }} -PversionCode=${{ steps.version.outputs.version_code }}
         working-directory: android
 
       - name: Rename APK
+        if: steps.check_android.outputs.should_run == 'true'
         run: mv android/app/build/outputs/apk/debug/app-debug.apk Devote-${{ steps.version.outputs.version_name }}-android.apk
 
       - name: Upload APK to GitHub Release
+        if: steps.check_android.outputs.should_run == 'true'
         uses: softprops/action-gh-release@v2
         with:
           files: Devote-${{ steps.version.outputs.version_name }}-android.apk

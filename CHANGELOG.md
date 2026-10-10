@@ -13,6 +13,10 @@ All notable changes to the Devote application will be documented in this file.
     - Added `linux` recognition to `getPlatformName()`.
     - Added stable hardware ID extraction from `/etc/machine-id` and `/var/lib/dbus/machine-id` (SHA-256 hashed), with graceful UUID fallback.
   - Added unit test coverage for platform detection and device ID generation.
+  - Added targeted platform release triggers to `.github/workflows/build.yml`:
+    - Standard tags (`v1.2.x`) trigger all platforms.
+    - Platform-specific tags (e.g. `v1.2.x-linux`, `v1.2.x-windows`, `v1.2.x-macos`, `v1.2.x-android`, `v1.2.x-desktop`) selectively build and release only targeted operating systems without triggering auto-updates on unrelated platforms.
+    - Added manual `workflow_dispatch` trigger with platform selection dropdown in GitHub Actions.
 
 ### Documentation & Architecture
 - **Multi-Platform Distribution & Monetization Roadmap**: Documented target distribution paths across platforms:
