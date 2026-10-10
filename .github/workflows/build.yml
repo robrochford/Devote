@@ -18,6 +18,7 @@ on:
           - macos
           - linux
           - android
+          - ios
 
 jobs:
   release:
@@ -52,7 +53,7 @@ jobs:
           SHOULD_RUN="false"
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ "$INPUT_PLATFORM" = "all" ] || [ "$INPUT_PLATFORM" = "$CURRENT" ] || { [ "$INPUT_PLATFORM" = "desktop (win, mac, linux)" ] && [ "$CURRENT" != "android" ]; }; then
+            if [ "$INPUT_PLATFORM" = "all" ] || [ "$INPUT_PLATFORM" = "$CURRENT" ] || { [ "$INPUT_PLATFORM" = "desktop (win, mac, linux)" ] && [ "$CURRENT" != "android" ] && [ "$CURRENT" != "ios" ]; }; then
               SHOULD_RUN="true"
             fi
           else
@@ -186,3 +187,95 @@ jobs:
           files: Devote-${{ steps.version.outputs.version_name }}-android.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  ios:
+    runs-on: macos-latest
+
+    permissions:
+      contents: write
+
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Determine if iOS should run
+        id: check_ios
+        shell: bash
+        run: |
+          TAG="${{ github.ref_name }}"
+          INPUT_PLATFORM="${{ github.event.inputs.platform }}"
+          SHOULD_RUN="false"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "$INPUT_PLATFORM" = "all" ] || [ "$INPUT_PLATFORM" = "ios" ]; then
+              SHOULD_RUN="true"
+            fi
+          else
+            # Standard tags (e.g. v1.2.52) run all platforms
+            if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              SHOULD_RUN="true"
+            elif [[ "$TAG" =~ -ios$ ]]; then
+              SHOULD_RUN="true"
+            fi
+          fi
+
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          echo "iOS evaluation: should_run=$SHOULD_RUN"
+
+      - name: Check out Git repository
+        if: steps.check_ios.outputs.should_run == 'true'
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        if: steps.check_ios.outputs.should_run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        if: steps.check_ios.outputs.should_run == 'true'
+        run: npm install
+
+      - name: Build web assets and add/sync iOS
+        if: steps.check_ios.outputs.should_run == 'true'
+        run: |
+          npm run build
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+          npx cap sync ios
+
+      - name: Extract version info from package.json
+        if: steps.check_ios.outputs.should_run == 'true'
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version_name=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build iOS Xcode Archive
+        if: steps.check_ios.outputs.should_run == 'true'
+        run: |
+          xcodebuild -workspace ios/App/App.xcworkspace \
+                     -scheme App \
+                     -configuration Release \
+                     -destination 'generic/platform=iOS' \
+                     CODE_SIGNING_ALLOWED=NO \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGN_IDENTITY="" \
+                     build
+
+      - name: Package iOS Build Artifacts
+        if: steps.check_ios.outputs.should_run == 'true'
+        run: |
+          cd ios/App
+          zip -r ../../Devote-${{ steps.version.outputs.version_name }}-ios-project.zip App.xcworkspace Pods
+          cd ../..
+
+      - name: Upload iOS Project to GitHub Release
+        if: steps.check_ios.outputs.should_run == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Devote-${{ steps.version.outputs.version_name }}-ios-project.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

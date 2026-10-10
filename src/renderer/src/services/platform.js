@@ -3,6 +3,7 @@ import { Preferences } from '@capacitor/preferences'
 import { Filesystem, Directory } from '@capacitor/filesystem'
 import { App as CapApp } from '@capacitor/app'
 import { getReadingForDay, allBooksDict } from './planGenerator'
+import { computeStreakStatus } from '../../main/streak'
 import bundledMHC from './matthew_henry_concise.json'
 
 export const isElectron = () => typeof window !== 'undefined' && Boolean(window.electron && window.electron.ipcRenderer)
@@ -25,7 +26,9 @@ const defaultSettings = {
   planType: 'devote',
   customBooks: [],
   currentPlanDay: 1,
-  launchAtStartup: false
+  launchAtStartup: false,
+  dailyAlertTime: '07:00',
+  alertEnabled: true
 }
 
 export async function getSettings() {
@@ -77,11 +80,25 @@ export async function saveSettings(patch) {
   }
 }
 
+export async function evaluateMobileStreak() {
+  if (isElectron()) return
+  try {
+    const current = await getSettings()
+    const todayStr = getLocalDayStr()
+    const status = computeStreakStatus(current, todayStr)
+    if (status.shouldUpdate) {
+      await saveSettings({ currentStreak: status.currentStreak })
+    }
+  } catch (err) {
+    console.error('Mobile streak eval error:', err)
+  }
+}
+
 export async function getVersion() {
   if (isElectron()) {
     return window.electron.ipcRenderer.invoke('get-version')
   }
-  return '1.2.43'
+  return '1.2.56'
 }
 
 export async function getAllBooks() {
@@ -411,8 +428,8 @@ export async function activateLicense(licenseKey) {
       data: {
         license_key: cleanKey,
         device_id: 'mobile-' + Math.random().toString(36).substring(2, 10),
-        device_name: 'Devote Mobile',
-        platform: 'android'
+        device_name: Capacitor.getPlatform() === 'ios' ? 'Devote iOS' : 'Devote Mobile',
+        platform: Capacitor.getPlatform() || 'mobile'
       }
     })
     if (res.status === 200) {

@@ -13,6 +13,21 @@ All notable changes to the Devote application will be documented in this file.
     - Completed today (diff = 0) or yesterday (diff = 1): streak preserved.
     - More than 1 full calendar day missed (diff >= 2): streak resets to 0.
   - Added unit test suite (`test/streak.test.js`) verifying same-day restarts, update relaunches, next-day evaluations, and skipped days.
+- **Android App Resume & Day-Reset Lifecycle**:
+  - Added `appStateChange` listener in `App.jsx` so that when the Android app is resumed or opened after midnight, `evaluateMobileStreak()` and `completedToday` recalculate against the new calendar day, instantly resetting to the new day's devotion instead of lingering on yesterday's completion screen.
+
+### Added
+- **Android Morning Devotion Alert & Onboarding Setup**:
+  - Added Step 3 to onboarding (`WelcomeScreen.jsx`) allowing users to choose their daily morning quiet time alert (default 07:00).
+  - Added customizable "Morning Devotion Prompt" toggle and time picker to the Settings panel in `App.jsx`.
+  - Configured `MainActivity.java` with `setShowWhenLocked(true)` and `setTurnScreenOn(true)` window attributes.
+  - Added required permissions in `AndroidManifest.xml` (`RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `POST_NOTIFICATIONS`, `USE_FULL_SCREEN_INTENT`) allowing Devote to wake and present over the lock screen on Android.
+- **iOS Mobile Platform Integration**:
+  - Integrated `@capacitor/ios` into `package.json` with scripts `cap:sync:ios`, `cap:build:ios`, and `cap:open:ios`.
+  - Added automated iOS build and packaging pipeline to `.github/workflows/build.yml` running on `macos-latest`.
+  - Added `ios` selector to `workflow_dispatch` and support for `-ios` release tags.
+  - Updated mobile license activation in `platform.js` to dynamically detect iOS and set device name to `Devote iOS`.
+  - Bumped version to `v1.2.56`.
 
 ### Added
 - **Linux Desktop Build & Distribution Support**:

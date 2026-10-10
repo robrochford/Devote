@@ -31,6 +31,7 @@ export default function App() {
   useEffect(() => {
     // Load version and initial settings via platform abstraction
     platform.getVersion().then(v => setAppVersion(v))
+    platform.evaluateMobileStreak()
     platform.getSettings().then(s => {
       // Migrate old geminiApiKey to generic aiApiKey if found
       if (s.geminiApiKey && !s.aiApiKey) {
@@ -110,7 +111,7 @@ export default function App() {
       }
     }
 
-    // Android hardware back button handler
+    // Android hardware back button & app resume lifecycle handlers
     if (platform.isCapacitor()) {
       const backListener = CapApp.addListener('backButton', () => {
         if (showSettings) {
@@ -128,11 +129,35 @@ export default function App() {
         CapApp.exitApp()
       })
 
+      // When the app returns from background to foreground:
+      // Re-evaluate streak and reload today's devotion state so yesterday's session doesn't linger
+      const stateListener = CapApp.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) {
+          platform.evaluateMobileStreak().then(() => {
+            return platform.getSettings()
+          }).then(s => {
+            setSettings(s)
+            setCurrentScreen(prev => {
+              if (!s.completedToday && prev === 'complete') {
+                setResetKey(key => key + 1)
+                setJustFinished(false)
+                return 'prayer'
+              }
+              if (s.completedToday && !justFinished) {
+                return 'complete'
+              }
+              return prev
+            })
+          })
+        }
+      })
+
       return () => {
         backListener.then(l => l.remove()).catch(() => {})
+        stateListener.then(l => l.remove()).catch(() => {})
       }
     }
-  }, [showSettings, currentScreen])
+  }, [showSettings, currentScreen, justFinished])
 
   useEffect(() => {
     // Keep frosted glass
@@ -434,6 +459,38 @@ export default function App() {
                 <label htmlFor="startup-toggle" className="text-xs text-zinc-400 cursor-pointer select-none">
                   Launch Devote automatically on computer startup
                 </label>
+              </div>
+
+              {/* Daily Alert Time for Mobile & Reminder Systems */}
+              <div className="pt-3 border-t border-zinc-800/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="alert-toggle" className="text-xs text-zinc-300 cursor-pointer select-none font-medium">
+                    Morning Devotion Prompt
+                  </label>
+                  <input 
+                    type="checkbox"
+                    id="alert-toggle"
+                    className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-gold-500 focus:ring-gold-500 cursor-pointer"
+                    checked={settings.alertEnabled !== false}
+                    onChange={(e) => {
+                      const enabled = e.target.checked
+                      setSettings({...settings, alertEnabled: enabled})
+                    }}
+                  />
+                </div>
+                {settings.alertEnabled !== false && (
+                  <div className="flex items-center justify-between pl-1">
+                    <span className="text-xs text-zinc-400">Daily Alert Time</span>
+                    <input 
+                      type="time"
+                      value={settings.dailyAlertTime || '07:00'}
+                      onChange={(e) => {
+                        setSettings({...settings, dailyAlertTime: e.target.value})
+                      }}
+                      className="bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-gold-500"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="pt-2 flex gap-4">
