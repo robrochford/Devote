@@ -291,6 +291,17 @@ function createKioskWindow() {
     return { action: 'deny' }
   })
 
+  // Prevent any in-window navigation away from Devote app (e.g. clicking links inside passage/commentary)
+  kioskWindow.webContents.on('will-navigate', (event, navigationUrl) => {
+    // Only allow navigating within file:// or local dev server
+    const parsedUrl = new URL(navigationUrl)
+    const isLocal = parsedUrl.protocol === 'file:' || (is.dev && parsedUrl.host === new URL(process.env['ELECTRON_RENDERER_URL'] || 'http://localhost:5173').host)
+    if (!isLocal) {
+      event.preventDefault()
+      shell.openExternal(navigationUrl)
+    }
+  })
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     kioskWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -627,7 +638,7 @@ app.whenReady().then(() => {
       
       const query = encodeURIComponent(reading.reference)
       // IMPORTANT: Must fetch /html/ (not /json/) to match what WordScreen renders via dangerouslySetInnerHTML
-      const url = `https://api.esv.org/v3/passage/html/?q=${query}&include-headings=true&include-footnotes=false&include-audio-link=false`
+      const url = `https://api.esv.org/v3/passage/html/?q=${query}&include-headings=true&include-footnotes=false&include-audio-link=false&include-short-copyright=false`
       
       const response = await fetch(url, {
         headers: {

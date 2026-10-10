@@ -14,6 +14,17 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
   const [retryKey, setRetryKey] = useState(0) // Increment to re-run loadData without a full app reload
   const audioRef = useRef(null)
 
+  // Helper to remove any external links (like ESV copyright / site links) that hijack the app window
+  const sanitizePassageHtml = (html) => {
+    if (!html) return ''
+    // Strip ESV copyright paragraph or link: e.g. <p>(<a href="http://www.esv.org" class="copyright">ESV</a>)</p> or similar
+    let clean = html.replace(/<p[^>]*>\s*\(?\s*<a[^>]*class=["']copyright["'][^>]*>.*?<\/a>\s*\)?\s*<\/p>/gi, '')
+    // Also remove any standalone copyright links or anchors pointing to external sites
+    clean = clean.replace(/<a[^>]*class=["']copyright["'][^>]*>.*?<\/a>/gi, '')
+    clean = clean.replace(/<a[^>]*href=["']https?:\/\/[^"']*esv\.org[^"']*["'][^>]*>(.*?)<\/a>/gi, '$1')
+    return clean
+  }
+
   useEffect(() => {
     async function loadData() {
       setError('')
@@ -39,7 +50,7 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
             settings.cachedReading.reference === reading.reference) {
           console.log('Using cached reading for Day', reading.day)
           const data = settings.cachedReading.data
-          const html = data.passages[0]
+          const html = sanitizePassageHtml(data.passages[0])
           setPassageHtml(html)
           // Strip HTML so ReflectionScreen has clean text for AI prompt
           if (onPassageLoaded) onPassageLoaded(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
@@ -49,12 +60,12 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
           console.log('No cache found or day mismatch, fetching fresh...')
           const q = encodeURIComponent(reading.reference)
           const data = await platform.fetchEsv({
-            url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true`,
+            url: `https://api.esv.org/v3/passage/html/?q=${q}&include-footnotes=false&include-audio-link=false&include-headings=true&include-short-copyright=false`,
             apiKey: effectiveKey
           })
           
           if (data && data.passages && data.passages.length > 0) {
-            const html = data.passages[0]
+            const html = sanitizePassageHtml(data.passages[0])
             setPassageHtml(html)
             // Strip HTML so ReflectionScreen has clean text for AI prompt
             if (onPassageLoaded) onPassageLoaded(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
@@ -189,6 +200,13 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
             <div 
               className="prose prose-invert prose-p:text-zinc-300 prose-p:leading-loose prose-h2:text-gold-400 prose-h2:font-serif max-w-none pb-12"
               dangerouslySetInnerHTML={{ __html: passageHtml }}
+              onClick={(e) => {
+                const target = e.target.closest('a')
+                if (target) {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }
+              }}
             />
           )}
         </div>

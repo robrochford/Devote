@@ -2,6 +2,16 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-10-11]
+
+### Fixed
+- **In-App Window Hijacking via Scripture Links**:
+  - Resolved issue where clicking the ESV copyright link or external links at the bottom of scripture readings loaded external websites inside the app window, leaving users trapped.
+  - Added `include-short-copyright=false` parameter to both runtime (`WordScreen.jsx`) and background prefetch (`index.js`) ESV API requests.
+  - Added `sanitizePassageHtml()` in `WordScreen.jsx` to strip copyright anchor tags and links from passage HTML before rendering.
+  - Added `onClick` anchor event blocker on the rendered scripture container to prevent click-through on both desktop and mobile platforms.
+  - Added Electron `will-navigate` lifecycle listener on `kioskWindow.webContents` to strictly intercept any non-local navigation requests and route them safely to the default system browser via `shell.openExternal`.
+
 ## [2026-10-10]
 
 ### Fixed
