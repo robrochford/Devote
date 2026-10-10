@@ -3,7 +3,10 @@
   "version": "1.2.53",
   "description": "A distraction-free daily Christian devotional app",
   "main": "./out/main/index.js",
-  "author": "Devote",
+  "author": {
+    "name": "Devote",
+    "email": "support@electrodedigital.co.uk"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/robrochford/Devote.git"

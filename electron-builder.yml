@@ -35,6 +35,7 @@ nsis:
 linux:
   category: Utility
   executableName: devote
+  maintainer: Devote <support@electrodedigital.co.uk>
   artifactName: ${name}-${version}.${ext}
   target:
     - AppImage
