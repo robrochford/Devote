@@ -9,6 +9,7 @@ import Store from 'electron-store'
 
 import { getReadingForDay, allBooksDict } from './planGenerator'
 import { LicenseService, maskLicenseKey } from './licenseService'
+import { computeStreakStatus } from './streak'
 
 const store = new Store()
 const licenseService = new LicenseService(store)
@@ -300,19 +301,14 @@ function createKioskWindow() {
 function evaluateStreak() {
   const settings = store.store
   const todayStr = getLocalDayStr()
-  const lastOpened = settings.lastOpenedDate
+  const status = computeStreakStatus(settings, todayStr)
 
-  if (lastOpened && lastOpened !== todayStr) {
-    // It's a new day since the app was last opened.
-    // Did they complete it on the specific day they last opened it?
-    if (settings.lastCompletedDate !== lastOpened) {
-      // They started the computer/app that day, but didn't finish the devotion. Break it.
-      store.set('currentStreak', 0)
-    }
+  if (status.shouldUpdate) {
+    store.set('currentStreak', status.currentStreak)
   }
-  
-  // Record that the app was launched/run today
-  if (lastOpened !== todayStr) {
+
+  // Record that the app was launched/run today (for diagnostics/onboarding checks only)
+  if (settings.lastOpenedDate !== todayStr) {
     store.set('lastOpenedDate', todayStr)
   }
 }

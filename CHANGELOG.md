@@ -4,6 +4,16 @@ All notable changes to the Devote application will be documented in this file.
 
 ## [2026-10-10]
 
+### Fixed
+- **Streak Preservation on App Updates & Restarts**:
+  - Resolved bug where users lost their devotion streak after applying updates or restarting the app.
+  - Decoupled streak resets from `lastOpenedDate`, which was falsely resetting streaks to 0 whenever auto-updates restarted the app or background processes evaluated streaks before the user finished that day's reading.
+  - Created modular streak computation service (`src/main/streak.js`) utilizing pure calendar-day difference calculations (`computeStreakStatus`).
+  - Streaks are now strictly defined by elapsed calendar days from `lastCompletedDate`:
+    - Completed today (diff = 0) or yesterday (diff = 1): streak preserved.
+    - More than 1 full calendar day missed (diff >= 2): streak resets to 0.
+  - Added unit test suite (`test/streak.test.js`) verifying same-day restarts, update relaunches, next-day evaluations, and skipped days.
+
 ### Added
 - **Linux Desktop Build & Distribution Support**:
   - Configured `electron-builder.yml` with native Linux targets: standalone universal **AppImage** and Debian/Ubuntu **.deb** package installers (`StartupWMClass: devote`).
