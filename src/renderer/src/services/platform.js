@@ -28,7 +28,9 @@ const defaultSettings = {
   currentPlanDay: 1,
   launchAtStartup: false,
   dailyAlertTime: '07:00',
-  alertEnabled: true
+  alertEnabled: true,
+  textSize: 'normal',
+  windowSize: 'normal'
 }
 
 export async function getSettings() {

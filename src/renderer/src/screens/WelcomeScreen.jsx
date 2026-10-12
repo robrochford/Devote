@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import PlanSelector from '../components/PlanSelector'
 import * as platform from '../services/platform'
 
-export default function WelcomeScreen({ onComplete }) {
+export default function WelcomeScreen({ onComplete, onCancel }) {
   const [step, setStep] = useState(1)
   const [planType, setPlanType] = useState('devote')
   const [customBooks, setCustomBooks] = useState([])
@@ -61,20 +61,35 @@ export default function WelcomeScreen({ onComplete }) {
   return (
     <div className="absolute inset-0 z-50 flex flex-col px-6 sm:px-12 text-white animate-fade-in overflow-y-auto pb-16">
       {/* Top Drag Handle + Controls */}
-      <div className="h-16 shrink-0 w-full flex items-center justify-end" style={{ WebkitAppRegion: 'drag' }}>
-         {step === 2 && (
-         <button 
-           className="px-5 py-2.5 flex items-center justify-center text-gold-500 hover:text-gold-400 transition-colors text-xs font-bold tracking-widest uppercase bg-gold-500/10 border border-gold-500/30 rounded-full hover:bg-gold-500/20"
-           style={{ WebkitAppRegion: 'no-drag' }}
-           onClick={(e) => {
-              e.stopPropagation()
-              if (window.electron) window.electron.ipcRenderer.send('minimize-window') 
-           }}
-           title="Minimize Devote (to grab API Key)"
-         >
-           Minimize app to get your AI API token
-         </button>
-         )}
+      <div className="h-16 shrink-0 w-full flex items-center justify-between" style={{ WebkitAppRegion: 'drag' }}>
+        <div>
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="p-2 rounded-full text-zinc-400 hover:text-white bg-zinc-800/80 hover:bg-zinc-700 transition-colors border border-zinc-700/50 flex items-center gap-1.5 text-xs px-3"
+              style={{ WebkitAppRegion: 'no-drag' }}
+              title="Cancel and return to devotion"
+            >
+              <X size={16} />
+              <span>Cancel</span>
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {step === 2 && (
+            <button 
+              className="px-5 py-2.5 flex items-center justify-center text-gold-500 hover:text-gold-400 transition-colors text-xs font-bold tracking-widest uppercase bg-gold-500/10 border border-gold-500/30 rounded-full hover:bg-gold-500/20"
+              style={{ WebkitAppRegion: 'no-drag' }}
+              onClick={(e) => {
+                 e.stopPropagation()
+                 if (window.electron) window.electron.ipcRenderer.send('minimize-window') 
+              }}
+              title="Minimize Devote (to grab API Key)"
+            >
+              Minimize app to get your AI API token
+            </button>
+          )}
+        </div>
       </div>
       
       {step === 1 && (

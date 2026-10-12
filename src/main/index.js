@@ -214,9 +214,12 @@ function createKioskWindow() {
 
   const isSetup = store.get('hasCompletedOnboarding') || false
 
+  const windowIconPath = join(__dirname, '../../resources/icon.png')
+
   kioskWindow = new BrowserWindow({
     show: false,
     frame: false,
+    icon: windowIconPath,
     alwaysOnTop: true,
     // kiosk: true causes issues on macOS — it locks the screen and can't be
     // minimized or hidden, leaving a black screen after Skip Today / Snooze.

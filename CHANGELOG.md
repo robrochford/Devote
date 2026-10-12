@@ -2,7 +2,25 @@
 
 All notable changes to the Devote application will be documented in this file.
 
-## [2026-10-11]
+## [2026-10-12]
+
+### Fixed
+- **'Configure Study Plan' Reset Loop**:
+  - Fixed an issue where clicking "Configure Study Plan (Restart Year)" returned immediately to the devotion screen instead of opening the study plan selector.
+  - Resolved root cause where the silent migration guard was observing non-null `lastCompletedDate` and instantly re-marking `hasCompletedOnboarding: true`.
+  - Clicking "Configure Study Plan" now resets `lastCompletedDate` and `completedToday` to null/false, and the migration guard strictly checks `hasCompletedOnboarding === undefined`.
+  - Added an in-place `Cancel` button to the onboarding header so existing users can cancel out of plan configuration at any time without losing their spot.
+- **Linux Alt-Tab & Dock (Plank) Missing Icon**:
+  - Added explicit window icon initialization (`icon: windowIconPath`) to `BrowserWindow` in `src/main/index.js`.
+  - Linux window managers (X11/Wayland) and docks (like Plank) require `_NET_WM_ICON` on the native window instance to prevent falling back to generic cog icons during Alt-Tab and dock pinning.
+
+### Added
+- **Reading Text Size Accessibility Controls**:
+  - Added a dedicated text size adjustment setting in the Settings modal (`small`, `normal`, `large`, `xl`).
+  - Scoped strictly to dynamic content: dynamically resizes Scripture verse text, Matthew Henry Commentary (desktop panel and mobile bottom sheet), and AI Guided Reflection questions without distorting UI buttons, headers, or navigation chrome.
+- **Desktop Window / Card Size Preference**:
+  - Added desktop reading card size setting (`compact: 700px / 3xl`, `normal: 750px / 4xl`, `spacious: 860px / 5xl`) to allow users on larger monitors (e.g. 24" external screens) or specific Linux DPI setups to expand their usable devotion reading area.
+
 
 ### Fixed
 - **In-App Window Hijacking via Scripture Links**:

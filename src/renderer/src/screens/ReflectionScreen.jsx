@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Sparkles, Loader2, Check, ArrowLeft } from 'lucide-react'
 import * as platform from '../services/platform'
 
-export default function ReflectionScreen({ isActive, apiKey, passageText, onNext, onBack }) {
+export default function ReflectionScreen({ isActive, apiKey, passageText, textSize = 'normal', onNext, onBack }) {
   const [questions, setQuestions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -119,7 +119,19 @@ CRITICAL: Return ONLY the questions. No headers (like "# Questions"), no labels 
               <span className="absolute -top-3 -left-2 sm:-left-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs sm:text-sm font-serif text-gold-500">
                 {i + 1}
               </span>
-              <p className="text-zinc-300 leading-relaxed text-base sm:text-lg pt-1">{q}</p>
+              <p 
+                className={`text-zinc-300 leading-relaxed pt-1 ${
+                  textSize === 'small'
+                    ? 'text-sm sm:text-base'
+                    : textSize === 'large'
+                    ? 'text-lg sm:text-xl'
+                    : textSize === 'xl'
+                    ? 'text-xl sm:text-2xl'
+                    : 'text-base sm:text-lg'
+                }`}
+              >
+                {q}
+              </p>
             </div>
           ))}
         </div>

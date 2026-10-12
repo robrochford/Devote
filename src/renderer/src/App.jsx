@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Settings, X, KeyRound, AlertTriangle, CheckCircle2, ShieldCheck, Mail, Laptop } from 'lucide-react'
+import { Settings, X, KeyRound, AlertTriangle, CheckCircle2, ShieldCheck, Mail, Laptop, Type, Maximize2 } from 'lucide-react'
 import PrayerScreen from './screens/PrayerScreen'
 import WordScreen from './screens/WordScreen'
 import ReflectionScreen from './screens/ReflectionScreen'
@@ -45,7 +45,9 @@ export default function App() {
       }
 
       // Silent migration for users before v1.1
-      if (!s.hasCompletedOnboarding && s.lastCompletedDate !== null) {
+      // Note: Only migrate if planType exists and hasCompletedOnboarding is undefined/null,
+      // never override when explicitly set to false by user configuring their plan.
+      if (s.hasCompletedOnboarding === undefined && s.lastCompletedDate !== null && s.planType) {
          s.hasCompletedOnboarding = true;
          platform.saveSettings({ hasCompletedOnboarding: true })
       }
@@ -233,7 +235,13 @@ export default function App() {
   }
 
   return (
-    <div className="relative w-full h-full md:h-[750px] md:max-w-4xl md:m-auto animate-fade-in group flex flex-col">
+    <div className={`relative w-full h-full m-auto animate-fade-in group flex flex-col ${
+      settings.windowSize === 'compact'
+        ? 'md:h-[700px] md:max-w-3xl'
+        : settings.windowSize === 'spacious'
+        ? 'md:h-[860px] md:max-w-5xl'
+        : 'md:h-[750px] md:max-w-4xl'
+    }`}>
       {/* App Container */}
       <div className="flex-1 w-full h-full transition-all duration-700 bg-zinc-900/90 backdrop-blur-xl md:border md:border-zinc-700/50 md:rounded-3xl shadow-2xl overflow-hidden relative flex flex-col">
         
@@ -493,10 +501,78 @@ export default function App() {
                 )}
               </div>
 
+              {/* Reading Display & Accessibility */}
+              <div className="pt-3 border-t border-zinc-800/80 space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Type size={16} className="text-gold-500" />
+                    <label className="text-xs font-medium text-zinc-300">Reading Text Size</label>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { id: 'small', label: 'Small', sample: 'text-xs' },
+                      { id: 'normal', label: 'Default', sample: 'text-sm' },
+                      { id: 'large', label: 'Large', sample: 'text-base' },
+                      { id: 'xl', label: 'X-Large', sample: 'text-lg' }
+                    ].map(t => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setSettings({ ...settings, textSize: t.id })}
+                        className={`py-2 px-2 rounded-lg border text-xs font-medium transition-colors flex flex-col items-center justify-center gap-0.5 ${
+                          (settings.textSize || 'normal') === t.id
+                            ? 'bg-gold-500/20 border-gold-500/60 text-gold-400 font-semibold'
+                            : 'bg-zinc-800/70 border-zinc-700/60 text-zinc-400 hover:text-white hover:bg-zinc-800'
+                        }`}
+                      >
+                        <span className={t.sample}>Aa</span>
+                        <span className="text-[10px] opacity-80">{t.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-zinc-500 mt-1.5 px-1">
+                    Adjusts font size of Scripture, Matthew Henry commentary, and guided reflections.
+                  </p>
+                </div>
+
+                {/* Window / Card Size (Desktop only) */}
+                <div className="hidden md:block pt-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Maximize2 size={16} className="text-gold-500" />
+                    <label className="text-xs font-medium text-zinc-300">Window Size</label>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'compact', label: 'Compact', desc: '700px' },
+                      { id: 'normal', label: 'Standard', desc: '750px' },
+                      { id: 'spacious', label: 'Spacious', desc: '860px / 5xl' }
+                    ].map(w => (
+                      <button
+                        key={w.id}
+                        type="button"
+                        onClick={() => setSettings({ ...settings, windowSize: w.id })}
+                        className={`py-2 px-2 rounded-lg border text-xs font-medium transition-colors flex flex-col items-center justify-center gap-0.5 ${
+                          (settings.windowSize || 'normal') === w.id
+                            ? 'bg-gold-500/20 border-gold-500/60 text-gold-400 font-semibold'
+                            : 'bg-zinc-800/70 border-zinc-700/60 text-zinc-400 hover:text-white hover:bg-zinc-800'
+                        }`}
+                      >
+                        <span>{w.label}</span>
+                        <span className="text-[10px] opacity-70">{w.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="pt-2 flex gap-4">
                 <button 
                   onClick={() => {
-                    handleSaveSettings({ hasCompletedOnboarding: false })
+                    handleSaveSettings({ 
+                      hasCompletedOnboarding: false,
+                      lastCompletedDate: null,
+                      completedToday: false
+                    })
                   }}
                   className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 hover:text-white text-zinc-400 rounded-lg transition-colors border border-zinc-700 text-sm"
                 >
@@ -595,6 +671,7 @@ export default function App() {
                   apiKey={settings.aiApiKey} 
                   esvApiKey={settings.esvApiKey}
                   passageText={passageText}
+                  textSize={settings.textSize}
                   onNext={() => handleNext('complete')} 
                   onBack={() => handleNext('word')}
                />
@@ -623,7 +700,10 @@ export default function App() {
 
         {/* 2. Onboarding Gate: Shown after license is active if user hasn't onboarded yet */}
         {licenseInfo?.isLicensed && !settings.hasCompletedOnboarding && Object.keys(settings).length > 0 && (
-          <WelcomeScreen onComplete={handleSaveSettings} />
+          <WelcomeScreen 
+            onComplete={handleSaveSettings} 
+            onCancel={settings.planType ? () => handleSaveSettings({ hasCompletedOnboarding: true }) : undefined}
+          />
         )}
 
         {/* 3. Plan Completion */}

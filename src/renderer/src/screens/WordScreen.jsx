@@ -198,7 +198,15 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
             </div>
           ) : (
             <div 
-              className="prose prose-invert prose-p:text-zinc-300 prose-p:leading-loose prose-h2:text-gold-400 prose-h2:font-serif max-w-none pb-12"
+              className={`prose prose-invert prose-p:text-zinc-300 prose-p:leading-loose prose-h2:text-gold-400 prose-h2:font-serif max-w-none pb-12 ${
+                settings.textSize === 'small'
+                  ? 'prose-sm prose-p:text-sm'
+                  : settings.textSize === 'large'
+                  ? 'prose-lg prose-p:text-lg prose-h2:text-2xl'
+                  : settings.textSize === 'xl'
+                  ? 'prose-xl prose-p:text-xl prose-h2:text-3xl'
+                  : 'prose-base prose-p:text-base'
+              }`}
               dangerouslySetInnerHTML={{ __html: passageHtml }}
               onClick={(e) => {
                 const target = e.target.closest('a')
@@ -252,7 +260,18 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
               })
               return paragraphs
             })().map((paragraph, idx) => (
-              <p key={idx} className="text-zinc-300 leading-relaxed text-sm mb-4">
+              <p 
+                key={idx} 
+                className={`text-zinc-300 leading-relaxed mb-4 ${
+                  settings.textSize === 'small'
+                    ? 'text-xs'
+                    : settings.textSize === 'large'
+                    ? 'text-base'
+                    : settings.textSize === 'xl'
+                    ? 'text-lg'
+                    : 'text-sm'
+                }`}
+              >
                 {paragraph.trim()}
               </p>
             ))}
@@ -297,7 +316,18 @@ export default function WordScreen({ settings, apiKey, aiApiKey, onNext, onPassa
                 })
                 return paragraphs
               })().map((paragraph, idx) => (
-                <p key={idx} className="text-zinc-300 leading-relaxed text-sm">
+                <p 
+                  key={idx} 
+                  className={`text-zinc-300 leading-relaxed ${
+                    settings.textSize === 'small'
+                      ? 'text-xs'
+                      : settings.textSize === 'large'
+                      ? 'text-base'
+                      : settings.textSize === 'xl'
+                      ? 'text-lg'
+                      : 'text-sm'
+                  }`}
+                >
                   {paragraph.trim()}
                 </p>
               ))}
