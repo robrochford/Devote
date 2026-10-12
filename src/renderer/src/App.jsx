@@ -275,13 +275,14 @@ export default function App() {
 
         {/* Settings Panel */}
         {showSettings && settings.hasCompletedOnboarding && (
-          <div className="absolute inset-0 bg-black/80 md:bg-black/40 backdrop-blur-2xl z-[150] p-6 sm:p-10 animate-fade-in flex flex-col justify-start md:justify-center overflow-y-auto custom-scrollbar">
-            <div className="w-full max-w-md mx-auto pt-12 md:pt-0 pb-10">
-              <div className="flex items-center justify-between mb-6">
+          <div className="absolute inset-0 bg-black/90 md:bg-black/60 backdrop-blur-2xl z-[150] p-6 sm:p-8 md:p-10 animate-fade-in flex flex-col justify-start overflow-y-auto custom-scrollbar">
+            <div className="w-full max-w-md mx-auto pt-6 md:pt-4 pb-12">
+              <div className="flex items-center justify-between mb-6 pb-2 border-b border-zinc-800/60">
                 <h2 className="text-2xl font-serif text-white">Settings</h2>
                 <button 
                   onClick={() => setShowSettings(false)}
-                  className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors md:hidden"
+                  className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  title="Close Settings"
                 >
                   <X size={20} />
                 </button>

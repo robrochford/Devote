@@ -10,6 +10,9 @@ All notable changes to the Devote application will be documented in this file.
   - Resolved root cause where the silent migration guard was observing non-null `lastCompletedDate` and instantly re-marking `hasCompletedOnboarding: true`.
   - Clicking "Configure Study Plan" now resets `lastCompletedDate` and `completedToday` to null/false, and the migration guard strictly checks `hasCompletedOnboarding === undefined`.
   - Added an in-place `Cancel` button to the onboarding header so existing users can cancel out of plan configuration at any time without losing their spot.
+- **Settings Screen Top Cut-Off**:
+  - Resolved issue where the top of the Settings screen (including the header and ESV API Key field) was cut off when opened on desktop screens.
+  - Removed `md:justify-center` from the settings overlay container in `App.jsx`, ensuring content aligns to top with natural vertical scrolling. Added a dedicated close button in the settings header for desktop use.
 - **Linux Alt-Tab & Dock (Plank) Missing Icon**:
   - Added explicit window icon initialization (`icon: windowIconPath`) to `BrowserWindow` in `src/main/index.js`.
   - Linux window managers (X11/Wayland) and docks (like Plank) require `_NET_WM_ICON` on the native window instance to prevent falling back to generic cog icons during Alt-Tab and dock pinning.
