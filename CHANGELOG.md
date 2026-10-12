@@ -18,11 +18,15 @@ All notable changes to the Devote application will be documented in this file.
   - Linux window managers (X11/Wayland) and docks (like Plank) require `_NET_WM_ICON` on the native window instance to prevent falling back to generic cog icons during Alt-Tab and dock pinning.
 
 ### Added
-- **Reading Text Size Accessibility Controls**:
-  - Added a dedicated text size adjustment setting in the Settings modal (`small`, `normal`, `large`, `xl`).
-  - Scoped strictly to dynamic content: dynamically resizes Scripture verse text, Matthew Henry Commentary (desktop panel and mobile bottom sheet), and AI Guided Reflection questions without distorting UI buttons, headers, or navigation chrome.
-- **Desktop Window / Card Size Preference**:
-  - Added desktop reading card size setting (`compact: 700px / 3xl`, `normal: 750px / 4xl`, `spacious: 860px / 5xl`) to allow users on larger monitors (e.g. 24" external screens) or specific Linux DPI setups to expand their usable devotion reading area.
+- **AI API Key Onboarding Walkthrough & Direct Provider Links**:
+  - Enhanced Step 2 of the onboarding flow (`WelcomeScreen.jsx`) with step-by-step guidance on connecting an AI API key.
+  - Added direct quick-links to provider developer consoles for OpenAI (ChatGPT), Anthropic (Claude), and Google AI Studio (Gemini).
+  - Clarified that API keys operate strictly client-side directly from the user's machine and never touch external servers, and noted that the step can be skipped and configured later in Settings.
+
+### Changed
+- **Removed Timer/Alarm on Desktop**:
+  - Filtered out the "Daily Quiet Time" (Morning Devotion Prompt / Daily Alert Time) step from desktop onboarding (`WelcomeScreen.jsx`), navigating directly to completion after the AI step on desktop platforms.
+  - Wrapped Morning Devotion Prompt and Daily Alert Time in `App.jsx` settings with `platform.isCapacitor()` so alarm/timer preferences are only exposed on mobile environments where system alarms/scheduled notifications operate.
 
 
 ### Fixed

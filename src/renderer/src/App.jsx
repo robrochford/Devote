@@ -470,37 +470,39 @@ export default function App() {
                 </label>
               </div>
 
-              {/* Daily Alert Time for Mobile & Reminder Systems */}
-              <div className="pt-3 border-t border-zinc-800/80 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="alert-toggle" className="text-xs text-zinc-300 cursor-pointer select-none font-medium">
-                    Morning Devotion Prompt
-                  </label>
-                  <input 
-                    type="checkbox"
-                    id="alert-toggle"
-                    className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-gold-500 focus:ring-gold-500 cursor-pointer"
-                    checked={settings.alertEnabled !== false}
-                    onChange={(e) => {
-                      const enabled = e.target.checked
-                      setSettings({...settings, alertEnabled: enabled})
-                    }}
-                  />
-                </div>
-                {settings.alertEnabled !== false && (
-                  <div className="flex items-center justify-between pl-1">
-                    <span className="text-xs text-zinc-400">Daily Alert Time</span>
+              {/* Daily Alert Time for Mobile Only (no timer/alarm on desktop) */}
+              {platform.isCapacitor() && (
+                <div className="pt-3 border-t border-zinc-800/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="alert-toggle" className="text-xs text-zinc-300 cursor-pointer select-none font-medium">
+                      Morning Devotion Prompt
+                    </label>
                     <input 
-                      type="time"
-                      value={settings.dailyAlertTime || '07:00'}
+                      type="checkbox"
+                      id="alert-toggle"
+                      className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-gold-500 focus:ring-gold-500 cursor-pointer"
+                      checked={settings.alertEnabled !== false}
                       onChange={(e) => {
-                        setSettings({...settings, dailyAlertTime: e.target.value})
+                        const enabled = e.target.checked
+                        setSettings({...settings, alertEnabled: enabled})
                       }}
-                      className="bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-gold-500"
                     />
                   </div>
-                )}
-              </div>
+                  {settings.alertEnabled !== false && (
+                    <div className="flex items-center justify-between pl-1">
+                      <span className="text-xs text-zinc-400">Daily Alert Time</span>
+                      <input 
+                        type="time"
+                        value={settings.dailyAlertTime || '07:00'}
+                        onChange={(e) => {
+                          setSettings({...settings, dailyAlertTime: e.target.value})
+                        }}
+                        className="bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-gold-500"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Reading Display & Accessibility */}
               <div className="pt-3 border-t border-zinc-800/80 space-y-4">

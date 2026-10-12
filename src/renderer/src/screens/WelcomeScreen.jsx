@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Loader2, X } from 'lucide-react'
+import { Loader2, X, ExternalLink } from 'lucide-react'
 import PlanSelector from '../components/PlanSelector'
 import * as platform from '../services/platform'
 
@@ -33,6 +33,8 @@ export default function WelcomeScreen({ onComplete, onCancel }) {
     }
   }
 
+  const isDesktop = !platform.isCapacitor()
+
   const handleFinish = async () => {
     setIsFinishing(true)
     
@@ -52,10 +54,18 @@ export default function WelcomeScreen({ onComplete, onCancel }) {
       customBooks: planType === 'devote' ? [] : customBooks,
       aiApiKey,
       dailyAlertTime,
-      alertEnabled,
+      alertEnabled: isDesktop ? false : alertEnabled,
       hasCompletedOnboarding: true,
       currentPlanDay: 1
     })
+  }
+
+  const openProviderUrl = (url) => {
+    if (window.electron) {
+      window.electron.ipcRenderer.send('open-external', url)
+    } else {
+      window.open(url, '_blank')
+    }
   }
 
   return (
@@ -120,44 +130,104 @@ export default function WelcomeScreen({ onComplete, onCancel }) {
       )}
 
       {step === 2 && (
-        <div className="max-w-xl mx-auto w-full flex flex-col mt-10 sm:mt-20 animate-fade-in">
-           <h1 className="text-2xl sm:text-3xl font-serif mb-4 text-white">AI Reflection Engine</h1>
-           <p className="text-zinc-400 text-sm sm:text-base mb-8 leading-relaxed">
-             Devote can generate deep, pastoral questions tailored to the exact text you read each day. 
-             To enable this, paste an API key below (OpenAI, Anthropic, or Google Gemini).
+        <div className="max-w-xl mx-auto w-full flex flex-col mt-6 sm:mt-12 animate-fade-in">
+           <h1 className="text-2xl sm:text-3xl font-serif mb-3 text-white">AI Reflection Engine</h1>
+           <p className="text-zinc-400 text-sm mb-5 leading-relaxed">
+             Devote can generate deep, personal reflection questions tailored to each day's passage.
+             Connect your own AI API key from OpenAI, Anthropic, or Google Gemini.
            </p>
+
+           <div className="p-4 rounded-xl bg-zinc-800/60 border border-zinc-700/60 mb-5 text-xs text-zinc-300 space-y-2.5">
+             <div className="font-semibold text-white flex items-center gap-2">
+               <span className="w-2 h-2 rounded-full bg-gold-500"></span>
+               How to connect your API key:
+             </div>
+             <ol className="list-decimal list-inside space-y-1 text-zinc-400 leading-relaxed pl-1">
+               <li>Click one of the providers below to create or view your API key in your browser.</li>
+               <li>Copy the secret key and paste it into the field below.</li>
+               <li>Devote connects directly and securely from your device — your key never touches our servers.</li>
+             </ol>
+             <div className="pt-2 border-t border-zinc-700/50 flex flex-wrap gap-2 text-[11px]">
+               <button
+                 type="button"
+                 onClick={() => openProviderUrl('https://platform.openai.com/api-keys')}
+                 className="px-2.5 py-1 bg-zinc-700/70 hover:bg-zinc-700 text-zinc-200 rounded transition-colors flex items-center gap-1"
+                 style={{ WebkitAppRegion: 'no-drag' }}
+               >
+                 <span>OpenAI (ChatGPT)</span>
+                 <ExternalLink size={10} />
+               </button>
+               <button
+                 type="button"
+                 onClick={() => openProviderUrl('https://console.anthropic.com/settings/keys')}
+                 className="px-2.5 py-1 bg-zinc-700/70 hover:bg-zinc-700 text-zinc-200 rounded transition-colors flex items-center gap-1"
+                 style={{ WebkitAppRegion: 'no-drag' }}
+               >
+                 <span>Anthropic (Claude)</span>
+                 <ExternalLink size={10} />
+               </button>
+               <button
+                 type="button"
+                 onClick={() => openProviderUrl('https://aistudio.google.com/app/apikey')}
+                 className="px-2.5 py-1 bg-zinc-700/70 hover:bg-zinc-700 text-zinc-200 rounded transition-colors flex items-center gap-1"
+                 style={{ WebkitAppRegion: 'no-drag' }}
+               >
+                 <span>Google Gemini</span>
+                 <ExternalLink size={10} />
+               </button>
+             </div>
+           </div>
 
            <input 
               type="password" 
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-500 mb-2"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-500 mb-2 text-sm"
               value={aiApiKey}
               onChange={(e) => setAiApiKey(e.target.value)}
-              placeholder="sk-..."
+              placeholder="Paste your key here (e.g. sk-... or AIza...)"
             />
-            <p className="text-xs text-zinc-500 mb-10">You can always leave this blank to just use the standard reader, and add it in Settings later.</p>
+            <p className="text-xs text-zinc-500 mb-8">
+              Optional: you can skip this for now to use Devote as a classic daily reader, and add or change your key anytime in Settings.
+            </p>
             
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <button 
                 onClick={() => setStep(1)}
-                className="px-6 py-3 text-zinc-400 hover:text-white transition-colors"
+                className="px-6 py-3 text-zinc-400 hover:text-white transition-colors text-sm"
               >
                 Back
               </button>
-              <button 
-                onClick={() => setStep(3)}
-                className="px-8 py-3 bg-white text-black font-medium rounded-lg hover:bg-zinc-200 transition-colors"
-              >
-                Next
-              </button>
+              {isDesktop ? (
+                <button 
+                  onClick={handleFinish}
+                  disabled={isFinishing}
+                  className="px-8 py-3 bg-gold-500 text-black font-medium rounded-lg hover:bg-gold-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isFinishing ? (
+                    <>
+                      <Loader2 className="animate-spin text-black" size={20} />
+                      Preparing...
+                    </>
+                  ) : (
+                    'Start Devotion'
+                  )}
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setStep(3)}
+                  className="px-8 py-3 bg-white text-black font-medium rounded-lg hover:bg-zinc-200 transition-colors text-sm"
+                >
+                  Next
+                </button>
+              )}
             </div>
         </div>
       )}
 
-      {step === 3 && (
+      {step === 3 && !isDesktop && (
         <div className="max-w-xl mx-auto w-full flex flex-col mt-10 sm:mt-20 animate-fade-in">
            <h1 className="text-2xl sm:text-3xl font-serif mb-4 text-gold-500">Daily Quiet Time</h1>
            <p className="text-zinc-400 text-sm sm:text-base mb-8 leading-relaxed">
-             Devote protects your daily rhythm. Choose what time each morning Devote should notify or prompt you to spend quiet time with the Word.
+             Devote protects your daily rhythm. Choose what time each morning Devote should notify you to spend quiet time with the Word.
            </p>
 
            <div className="bg-zinc-800/60 border border-zinc-700/60 rounded-2xl p-6 mb-8 space-y-5">
