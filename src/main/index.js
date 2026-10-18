@@ -116,6 +116,10 @@ autoUpdater.autoDownload = true
 // prompt the user immediately so updates aren't silently deferred forever.
 
 let isCheckingForUpdate = false
+// Set once the app is genuinely quitting (tray Quit, quitAndInstall, OS logout)
+// so the kiosk window's close guard doesn't cancel the quit.
+let isQuitting = false
+app.on('before-quit', () => { isQuitting = true })
 
 autoUpdater.on('update-downloaded', (info) => {
   isCheckingForUpdate = false
@@ -238,7 +242,7 @@ function createKioskWindow() {
   // Prevent closing the window easily unless actioned internally.
   // Note: Standard OS emergency shortcuts remain out of scope for strict prevention in soft-kiosk mode.
   kioskWindow.on('close', (e) => {
-    if (kioskWindow.isVisible()) {
+    if (!isQuitting && kioskWindow.isVisible()) {
        e.preventDefault()
        kioskWindow.hide()
     }

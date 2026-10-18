@@ -2,6 +2,13 @@
 
 All notable changes to the Devote application will be documented in this file.
 
+## [2026-10-18]
+
+### Fixed
+- **'Restart Now' Update Button Not Restarting (Linux)**:
+  - The kiosk window's `close` guard (which hides the window to the tray instead of closing) was calling `preventDefault()` during `quitAndInstall`, cancelling the app quit. On Linux the freshly installed AppImage/.deb then hit the single-instance lock and exited, leaving the old version running.
+  - Added an `isQuitting` flag set on `before-quit`; the close guard now only intercepts user-initiated window closes, so update restarts, tray Quit and OS logout proceed normally.
+
 ## [2026-10-12]
 
 ### Fixed
